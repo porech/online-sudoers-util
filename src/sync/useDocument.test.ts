@@ -44,4 +44,17 @@ describe('useDocument', () => {
     act(() => result.current.undo())
     expect(result.current.text).toBe('a # one')
   })
+
+  it('explicit timestamps yield two discrete undo steps', () => {
+    const { result } = renderHook(() => useDocument('start'))
+    act(() => result.current.setText('e1', 'editor', 1000))
+    act(() => result.current.setText('e2', 'editor', 2000))
+    expect(result.current.text).toBe('e2')
+    expect(result.current.canUndo).toBe(true)
+    act(() => result.current.undo())
+    expect(result.current.text).toBe('e1')
+    act(() => result.current.undo())
+    expect(result.current.text).toBe('start')
+    expect(result.current.canUndo).toBe(false)
+  })
 })

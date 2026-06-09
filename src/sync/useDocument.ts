@@ -40,7 +40,7 @@ export function useDocument(initial: string): UseDocument {
   }, [])
 
   const commit = useCallback(
-    (next: string, origin: Origin, at = 0) => {
+    (next: string, origin: Origin, at = Date.now()) => {
       setTextState(next)
       setLastOrigin(origin)
       saveActiveText(next, at)
@@ -51,7 +51,7 @@ export function useDocument(initial: string): UseDocument {
   )
 
   const setText = useCallback(
-    (next: string, origin: Origin = 'editor', at = 0) => {
+    (next: string, origin: Origin = 'editor', at = Date.now()) => {
       commit(next, origin, at)
     },
     [commit],
@@ -61,7 +61,7 @@ export function useDocument(initial: string): UseDocument {
   const warnings = useMemo(() => validateDocument(doc), [doc])
 
   const writeLines = useCallback(
-    (lines: Line[], at = 0) => {
+    (lines: Line[], at = Date.now()) => {
       const next = serializeDocument({ lines })
       commit(next, 'table', at)
     },
@@ -78,7 +78,7 @@ export function useDocument(initial: string): UseDocument {
   )
 
   const addLine = useCallback(
-    (line: Line, at = 0) => {
+    (line: Line, at = Date.now()) => {
       writeLines([...doc.lines, { ...line, dirty: true }], at)
     },
     [doc, writeLines],
