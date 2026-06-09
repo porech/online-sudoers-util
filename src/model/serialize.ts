@@ -1,4 +1,4 @@
-import type { Line, DefaultsNode, DefaultsParam } from './types'
+import type { Line, DefaultsNode, DefaultsParam, AliasNode } from './types'
 
 export function serializeLine(line: Line): string {
   let body: string
@@ -8,7 +8,7 @@ export function serializeLine(line: Line): string {
     case 'include': body = `${line.includeKind} ${line.path}`; break
     case 'defaults': body = serializeDefaults(line); break
     case 'error': return line.raw
-    case 'alias': throw new Error('serializeAlias added in Phase 4')
+    case 'alias': body = serializeAlias(line); break
     case 'userspec': throw new Error('serializeUserSpec added in Phase 6')
   }
   return appendInline(body, line.inlineComment)
@@ -29,4 +29,11 @@ function serializeParam(p: DefaultsParam): string {
   const neg = p.negated ? '!' : ''
   if (p.op === 'bool') return `${neg}${p.name}`
   return `${neg}${p.name}${p.op}${p.value ?? ''}`
+}
+
+function serializeAlias(n: AliasNode): string {
+  const defs = n.defs
+    .map((d) => `${d.name} = ${d.items.join(', ')}`)
+    .join(' : ')
+  return `${n.aliasKind} ${defs}`
 }

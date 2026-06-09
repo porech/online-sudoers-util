@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { serializeLine } from './serialize'
 import { parseDefaults } from './parseDefaults'
 import type { CommentNode } from './types'
+import { parseAlias } from './parseAlias'
 
 describe('serializeLine: defaults', () => {
   it('round-trips a defaults line semantically', () => {
@@ -18,5 +19,12 @@ describe('serializeLine: defaults', () => {
   it('renders a comment node', () => {
     const c: CommentNode = { kind: 'comment', raw: '', dirty: true, text: 'hi' }
     expect(serializeLine(c)).toBe('# hi')
+  })
+})
+
+describe('serializeLine: alias', () => {
+  it('round-trips a multi-def alias', () => {
+    const n = parseAlias('Host_Alias WEB = web1, web2 : DB = db1', 1)
+    expect(serializeLine(n)).toBe('Host_Alias WEB = web1, web2 : DB = db1')
   })
 })
