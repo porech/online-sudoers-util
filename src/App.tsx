@@ -1,102 +1,95 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
+import { Editor } from './editor/Editor'
+import { Table } from './components/Table'
+import { Toolbar } from './components/Toolbar'
+import { AddEntryMenu } from './components/AddEntryMenu'
+import { useDocument } from './sync/useDocument'
+import { loadActiveText } from './sync/storage'
+import { newNode, type NewKind } from './model/factories'
+import type { Line } from './model/types'
+import { UserSpecModal } from './components/modals/UserSpecModal'
+import { AliasModal } from './components/modals/AliasModal'
+import { DefaultsModal } from './components/modals/DefaultsModal'
+import { IncludeModal } from './components/modals/IncludeModal'
+import { CommentModal } from './components/modals/CommentModal'
 
-function App() {
-  const [count, setCount] = useState(0)
+const EXAMPLE = `# Sample sudoers file
+Defaults env_reset
+User_Alias ADMINS = alice, bob
+root    ALL=(ALL:ALL) ALL
+%admin  ALL=(ALL) NOPASSWD: ALL
+@includedir /etc/sudoers.d
+`
+
+export default function App() {
+  const docState = useDocument(loadActiveText())
+  const { doc, text, warnings } = docState
+  const [editing, setEditing] = useState<{ index: number } | null>(null)
+
+  const openEditor = (index: number) => setEditing({ index })
+  const closeModal = () => setEditing(null)
+
+  const onAdd = (kind: NewKind) => {
+    const newIndex = doc.lines.length
+    docState.addLine(newNode(kind))
+    setEditing({ index: newIndex })
+  }
+
+  const saveEdited = (line: Line) => {
+    if (editing) docState.updateLine(editing.index, line)
+    closeModal()
+  }
+
+  const current = editing ? doc.lines[editing.index] : undefined
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button type="button" className="counter" onClick={() => setCount((count) => count + 1)}>
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <header>
+        <h1>Online Sudoers Util</h1>
+        <Toolbar
+          text={text}
+          canUndo={docState.canUndo}
+          canRedo={docState.canRedo}
+          onUndo={docState.undo}
+          onRedo={docState.redo}
+          onClear={() => docState.setText('', 'table')}
+          onLoadExample={() => docState.setText(EXAMPLE, 'table')}
+        />
+      </header>
 
-      <div className="ticks"></div>
+      <main className="split">
+        <section className="pane">
+          <Editor value={text} onChange={(t) => docState.setText(t, 'editor')} />
+        </section>
+        <section className="pane">
+          <AddEntryMenu onAdd={onAdd} />
+          <Table
+            doc={doc}
+            warnings={warnings}
+            onEdit={openEditor}
+            onDelete={docState.removeLine}
+            onDuplicate={(i) => docState.addLine({ ...doc.lines[i], dirty: true })}
+            onMove={docState.moveLine}
+          />
+        </section>
+      </main>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      {current?.kind === 'userspec' && (
+        <UserSpecModal node={current} onSave={saveEdited} onCancel={closeModal} />
+      )}
+      {current?.kind === 'alias' && (
+        <AliasModal node={current} onSave={saveEdited} onCancel={closeModal} />
+      )}
+      {current?.kind === 'defaults' && (
+        <DefaultsModal node={current} onSave={saveEdited} onCancel={closeModal} />
+      )}
+      {current?.kind === 'include' && (
+        <IncludeModal node={current} onSave={saveEdited} onCancel={closeModal} />
+      )}
+      {current?.kind === 'comment' && (
+        <CommentModal node={current} onSave={saveEdited} onCancel={closeModal} />
+      )}
+    </div>
   )
 }
-
-export default App
