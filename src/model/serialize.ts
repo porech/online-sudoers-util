@@ -1,4 +1,7 @@
-import type { Line, DefaultsNode, DefaultsParam, AliasNode } from './types'
+import type {
+  Line, DefaultsNode, DefaultsParam, AliasNode,
+  UserSpecNode, SpecGroup, CmndSpec, RunasSpec, Tag,
+} from './types'
 
 export function serializeLine(line: Line): string {
   let body: string
@@ -9,7 +12,7 @@ export function serializeLine(line: Line): string {
     case 'defaults': body = serializeDefaults(line); break
     case 'error': return line.raw
     case 'alias': body = serializeAlias(line); break
-    case 'userspec': throw new Error('serializeUserSpec added in Phase 6')
+    case 'userspec': body = serializeUserSpec(line); break
   }
   return appendInline(body, line.inlineComment)
 }
@@ -36,4 +39,42 @@ function serializeAlias(n: AliasNode): string {
     .map((d) => `${d.name} = ${d.items.join(', ')}`)
     .join(' : ')
   return `${n.aliasKind} ${defs}`
+}
+
+function serializeUserSpec(n: UserSpecNode): string {
+  const users = n.users.join(', ')
+  const groups = n.specGroups.map(serializeSpecGroup).join(' : ')
+  return `${users} ${groups}`
+}
+
+function serializeSpecGroup(g: SpecGroup): string {
+  const hosts = g.hosts.join(', ')
+  const cmnds = serializeCmndSpecList(g.cmndSpecs)
+  return `${hosts} = ${cmnds}`
+}
+
+function serializeCmndSpecList(specs: CmndSpec[]): string {
+  let prevRunas: string | undefined
+  let prevTags: Tag[] = []
+  return specs
+    .map((s) => {
+      const parts: string[] = []
+      const runasStr = s.runas ? serializeRunas(s.runas) : undefined
+      if (runasStr !== undefined && runasStr !== prevRunas) {
+        parts.push(runasStr)
+        prevRunas = runasStr
+      }
+      const newTags = s.tags.filter((t) => !prevTags.includes(t))
+      for (const t of newTags) parts.push(`${t}:`)
+      prevTags = s.tags
+      for (const o of s.options) parts.push(`${o.name}=${o.value}`)
+      parts.push(s.command)
+      return parts.join(' ')
+    })
+    .join(', ')
+}
+
+function serializeRunas(r: RunasSpec): string {
+  const u = r.users.join(', ')
+  return r.groups.length > 0 ? `(${u}:${r.groups.join(', ')})` : `(${u})`
 }
