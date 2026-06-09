@@ -39,6 +39,16 @@ export function loadActiveText(): string {
   return env.sessions[env.activeSessionId]?.text ?? ''
 }
 
+// True if anything has ever been saved (so the app can show an example only on
+// the very first visit, while a deliberately-cleared document stays empty).
+export function hasStoredSession(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== null
+  } catch {
+    return false
+  }
+}
+
 // updatedAt is passed in by the caller (Date.now lives in the UI layer, kept out
 // of pure modules so tests stay deterministic).
 export function saveActiveText(text: string, updatedAt = 0): void {

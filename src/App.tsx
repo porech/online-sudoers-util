@@ -7,7 +7,7 @@ import { AddEntryMenu } from './components/AddEntryMenu'
 import { ThemeToggle } from './ui/ThemeToggle'
 import { GitHubLink } from './ui/GitHubLink'
 import { useDocument } from './sync/useDocument'
-import { loadActiveText } from './sync/storage'
+import { loadActiveText, hasStoredSession } from './sync/storage'
 import { newNode, type NewKind } from './model/factories'
 import type { Line } from './model/types'
 import { UserSpecModal } from './components/modals/UserSpecModal'
@@ -25,7 +25,11 @@ root    ALL=(ALL:ALL) ALL
 `
 
 export default function App() {
-  const docState = useDocument(loadActiveText())
+  // On the very first visit (nothing ever saved) start with the example so the
+  // tool isn't an empty page; once anything is saved — including a deliberate
+  // Clear — respect the stored content.
+  const [initialText] = useState(() => (hasStoredSession() ? loadActiveText() : EXAMPLE))
+  const docState = useDocument(initialText)
   const { doc, text, warnings } = docState
   const [editing, setEditing] = useState<{ index: number } | null>(null)
   const [hideNoise, setHideNoise] = useState(false)

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { loadActiveText, saveActiveText, STORAGE_KEY } from './storage'
+import { loadActiveText, saveActiveText, hasStoredSession, STORAGE_KEY } from './storage'
 
 describe('storage', () => {
   beforeEach(() => localStorage.clear())
@@ -7,6 +7,12 @@ describe('storage', () => {
 
   it('returns empty string when nothing is stored', () => {
     expect(loadActiveText()).toBe('')
+  })
+
+  it('hasStoredSession is false on first visit and true after any save (incl. empty)', () => {
+    expect(hasStoredSession()).toBe(false)
+    saveActiveText('')
+    expect(hasStoredSession()).toBe(true)
   })
 
   it('saves and loads the active session text', () => {

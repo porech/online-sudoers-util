@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
+import { saveActiveText } from './sync/storage'
 
 describe('App integration', () => {
   beforeEach(() => localStorage.clear())
@@ -13,6 +14,8 @@ describe('App integration', () => {
   })
 
   it('Ctrl+Z undoes the Load example action', async () => {
+    // Seed a saved (non-example) document so loading the example is a real edit.
+    saveActiveText('root ALL=(ALL) ALL')
     render(<App />)
     await userEvent.click(screen.getByRole('button', { name: /load example/i }))
     // After loading example the editor should contain example content
@@ -26,6 +29,7 @@ describe('App integration', () => {
   })
 
   it('Ctrl+Shift+Z redoes after an undo', async () => {
+    saveActiveText('root ALL=(ALL) ALL')
     render(<App />)
     await userEvent.click(screen.getByRole('button', { name: /load example/i }))
     act(() => {
