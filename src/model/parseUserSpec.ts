@@ -1,11 +1,10 @@
 import type { Line, UserSpecNode, SpecGroup, CmndSpec, RunasSpec, Tag, CmndOption } from './types'
-import { tokenize } from './tokenizer'
 import { splitTopLevel } from './parseDefaults'
 import { isTag } from './catalog'
+import { splitInlineComment } from './inlineComment'
 
 export function parseUserSpec(raw: string, _line: number): Line {
-  const { inlineComment } = tokenize(raw)
-  const work = stripInlineComment(raw.trim())
+  const { body: work, inlineComment } = splitInlineComment(raw)
 
   // Split "userlist hostgroup=cmnds [: hostgroup=cmnds]*"
   // The first whitespace run after the user list separates users from the rest.
@@ -252,20 +251,4 @@ function indexOfTopLevelSpace(s: string): number {
     else if ((c === ' ' || c === '\t') && !inD && !inS && inParen === 0) return i
   }
   return -1
-}
-
-function stripInlineComment(s: string): string {
-  let inD = false
-  let inS = false
-  for (let i = 0; i < s.length; i++) {
-    const c = s[i]
-    if (c === '\\' && i + 1 < s.length) {
-      i++
-      continue
-    }
-    if (c === '"' && !inS) inD = !inD
-    else if (c === "'" && !inD) inS = !inS
-    else if (c === '#' && !inD && !inS) return s.slice(0, i).trim()
-  }
-  return s
 }

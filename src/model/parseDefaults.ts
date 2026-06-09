@@ -1,15 +1,11 @@
 import type { Line, DefaultsNode, DefaultsParam, DefaultsBinding } from './types'
-import { tokenize } from './tokenizer'
 import { isKnownDefault } from './catalog'
+import { splitInlineComment } from './inlineComment'
 
 // We work off the raw string for params because values can contain '=' inside
 // quotes; we split params by top-level commas using the tokenizer for the head.
 export function parseDefaults(raw: string, _line: number): Line {
-  const { inlineComment } = tokenize(raw)
-  const trimmed = raw.trim()
-
-  // Separate the inline comment off the working string.
-  const work = stripInlineComment(trimmed)
+  const { body: work, inlineComment } = splitInlineComment(raw)
 
   const m = /^Defaults([@:!>])?(\S*)?\s*(.*)$/.exec(work)
   if (!m) throw new Error('malformed Defaults line')
@@ -79,20 +75,4 @@ export function splitTopLevel(s: string, delim: string): string[] {
   }
   out.push(cur)
   return out
-}
-
-function stripInlineComment(s: string): string {
-  let inD = false
-  let inS = false
-  for (let i = 0; i < s.length; i++) {
-    const c = s[i]
-    if (c === '\\' && i + 1 < s.length) {
-      i++
-      continue
-    }
-    if (c === '"' && !inS) inD = !inD
-    else if (c === "'" && !inD) inS = !inS
-    else if (c === '#' && !inD && !inS) return s.slice(0, i).trim()
-  }
-  return s
 }
