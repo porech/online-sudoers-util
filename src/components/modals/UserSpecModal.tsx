@@ -103,7 +103,8 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
       <label>
         Users{' '}
         <HelpText>
-          Who the rule applies to: usernames, %group, or a User_Alias. Comma-separated.
+          Who the rule applies to — one or more usernames, %group names, or a User_Alias, separated
+          by commas (e.g. alice, %wheel).
         </HelpText>
         <input value={users} onChange={(e) => setUsers(e.target.value)} />
       </label>
@@ -113,7 +114,8 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
           <label>
             Hosts{' '}
             <HelpText>
-              Where the rule applies: hostnames, ALL, or a Host_Alias. Comma-separated.
+              Where the rule applies — one or more hostnames, ALL, or a Host_Alias, separated by
+              commas.
             </HelpText>
             <input
               value={g.hosts.join(', ')}
@@ -133,8 +135,9 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
               <label>
                 Run as{' '}
                 <HelpText>
-                  The identity the command runs as, e.g. (root) or (root:wheel). Leave blank for the
-                  default.
+                  The identity the command runs as: one or more users, optionally followed by a
+                  colon and one or more groups — e.g. root or root, deploy:wheel. Multiple
+                  users/groups are comma-separated. Leave blank for the default (root).
                 </HelpText>
                 <input
                   value={
@@ -163,23 +166,40 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
               </label>
               <label>
                 Command{' '}
-                <HelpText>Full path, ALL, or a Cmnd_Alias. Prefix with ! to forbid.</HelpText>
+                <HelpText>
+                  A single command: a full path (e.g. /usr/bin/apt), ALL for any command, or a
+                  Cmnd_Alias. Prefix with ! to forbid it. To allow several commands, click “Add
+                  command” below to add a row for each.
+                </HelpText>
                 <input
                   value={c.command}
                   onChange={(e) => updateCmnd(gi, ci, { command: e.target.value })}
                 />
               </label>
-              <div className="tags">
-                {TAGS.map((t) => (
-                  <label key={t} title={tagInfo(t)}>
-                    <input
-                      type="checkbox"
-                      checked={c.tags.includes(t)}
-                      onChange={() => toggleTag(gi, ci, t)}
-                    />
-                    {t}
-                  </label>
-                ))}
+              <div className="tag-section">
+                <span className="options-label">
+                  Tags{' '}
+                  <HelpText>
+                    Tags change how this command runs. Check any that apply — each tag carries
+                    forward to the commands after it in the same list until you change it.
+                  </HelpText>
+                </span>
+                <ul className="tag-list">
+                  {TAGS.map((t) => (
+                    <li key={t}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={c.tags.includes(t)}
+                          onChange={() => toggleTag(gi, ci, t)}
+                        />
+                        <span>
+                          {tagInfo(t)} (<code>{t}</code>)
+                        </span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
               </div>
               <div className="options">
                 <span className="options-label">

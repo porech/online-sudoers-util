@@ -11,7 +11,7 @@ describe('UserSpecModal', () => {
     const onSave = vi.fn()
     render(<UserSpecModal node={node} onSave={onSave} onCancel={() => {}} />)
 
-    const users = screen.getByLabelText(/users/i)
+    const users = screen.getByLabelText(/^users/i)
     await userEvent.clear(users)
     await userEvent.type(users, 'alice, bob')
 

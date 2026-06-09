@@ -41,9 +41,9 @@ describe('App integration', () => {
   it('editing a row via modal updates the editor text', async () => {
     render(<App />)
     await userEvent.click(screen.getByRole('button', { name: /add entry/i }))
-    await userEvent.click(screen.getByRole('button', { name: /^user spec$/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^user spec/i }))
     // modal opens automatically on add
-    const users = await screen.findByLabelText(/users/i)
+    const users = await screen.findByLabelText(/^users/i)
     await userEvent.clear(users)
     await userEvent.type(users, 'deploy')
     await userEvent.click(screen.getByRole('button', { name: /save/i }))

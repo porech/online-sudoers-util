@@ -5,12 +5,32 @@ interface Props {
   onAdd: (kind: NewKind) => void
 }
 
-const OPTIONS: Array<{ kind: NewKind; label: string }> = [
-  { kind: 'userspec', label: 'User spec' },
-  { kind: 'alias', label: 'Alias' },
-  { kind: 'defaults', label: 'Defaults' },
-  { kind: 'include', label: 'Include' },
-  { kind: 'comment', label: 'Comment' },
+const OPTIONS: Array<{ kind: NewKind; label: string; description: string }> = [
+  {
+    kind: 'userspec',
+    label: 'User spec',
+    description: 'Grant rule: let users run commands on hosts, optionally as another user.',
+  },
+  {
+    kind: 'alias',
+    label: 'Alias',
+    description: 'A reusable named group of users, hosts, run-as identities, or commands.',
+  },
+  {
+    kind: 'defaults',
+    label: 'Defaults',
+    description: 'Global sudo settings and options (e.g. env_reset, secure_path).',
+  },
+  {
+    kind: 'include',
+    label: 'Include',
+    description: 'Pull in another sudoers file or directory (@include / @includedir).',
+  },
+  {
+    kind: 'comment',
+    label: 'Comment',
+    description: 'A plain # comment line for documentation.',
+  },
 ]
 
 export function AddEntryMenu({ onAdd }: Props) {
@@ -28,7 +48,8 @@ export function AddEntryMenu({ onAdd }: Props) {
                   setOpen(false)
                 }}
               >
-                {o.label}
+                <span className="menu-label">{o.label}</span>
+                <span className="menu-desc">{o.description}</span>
               </button>
             </li>
           ))}

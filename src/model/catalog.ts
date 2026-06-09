@@ -116,7 +116,8 @@ export function defaultParamInfo(name: string): DefaultInfo | undefined {
 
 const TAG_INFO: Record<Tag, string> = {
   NOPASSWD: 'Do not prompt for a password for these commands.',
-  PASSWD: 'Prompt for a password (the default) — used to override an earlier NOPASSWD.',
+  PASSWD:
+    'Require a password for these commands (the default; re-enables prompting after a no-password rule).',
   NOEXEC: 'Prevent the command from running further commands.',
   EXEC: 'Allow the command to run further commands (overrides NOEXEC).',
   SETENV: 'Allow the user to set environment variables on the command line.',

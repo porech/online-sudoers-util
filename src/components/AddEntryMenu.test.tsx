@@ -8,7 +8,7 @@ describe('AddEntryMenu', () => {
     const onAdd = vi.fn()
     render(<AddEntryMenu onAdd={onAdd} />)
     await userEvent.click(screen.getByRole('button', { name: /add entry/i }))
-    await userEvent.click(screen.getByRole('button', { name: /^user spec$/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^user spec/i }))
     expect(onAdd).toHaveBeenCalledWith('userspec')
   })
 })

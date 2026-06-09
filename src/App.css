@@ -143,21 +143,40 @@
   display: block;
   margin: 0.5rem 0;
 }
-.modal input,
+/* Only text-like inputs span the full width — NOT checkboxes/radios, which
+   should stay their natural size and sit inline with their label text. */
+.modal input:not([type='checkbox']):not([type='radio']),
 .modal select {
   width: 100%;
   box-sizing: border-box;
 }
-.modal .tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.modal .tags label {
+.modal input[type='checkbox'] {
   width: auto;
-  display: inline-flex;
-  gap: 0.25rem;
-  align-items: center;
+  margin-right: 0.5rem;
+}
+/* Checkbox rows (Defaults flags, command tags, negate toggle): checkbox inline
+   with its description text, aligned to the first line. */
+.modal label:has(input[type='checkbox']) {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0.35rem 0;
+}
+.tag-section {
+  margin: 0.5rem 0;
+}
+.options-label {
+  display: block;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+.tag-list {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+}
+.tag-list li {
+  margin: 0;
 }
 .modal-actions {
   display: flex;
@@ -184,6 +203,9 @@
   margin: 0.25rem 0 0;
   padding: 0.25rem;
   z-index: 10;
+  width: 22rem;
+  max-width: 90vw;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 .add-entry .menu button {
   display: block;
@@ -191,9 +213,20 @@
   text-align: left;
   border: none;
   background: none;
-  padding: 0.3rem 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
   cursor: pointer;
 }
 .add-entry .menu button:hover {
   background: var(--code-bg);
+}
+.menu-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-h);
+}
+.menu-desc {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
