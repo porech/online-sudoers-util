@@ -69,7 +69,9 @@ export function DefaultsModal({ node, onSave, onCancel }: Props) {
                     : removeByName(d.name)
                 }
               />
-              {d.name} <HelpText>{d.description}</HelpText>
+              <span>
+                <span className="opt-name">{d.name}</span> — <HelpText>{d.description}</HelpText>
+              </span>
             </label>
           )
         })}
@@ -81,7 +83,7 @@ export function DefaultsModal({ node, onSave, onCancel }: Props) {
           const cur = find(d.name)
           return (
             <label key={d.name}>
-              {d.name} <HelpText>{d.description}</HelpText>
+              <span className="opt-name">{d.name}</span> <HelpText>{d.description}</HelpText>
               <input
                 value={cur?.value ?? ''}
                 placeholder={d.type}

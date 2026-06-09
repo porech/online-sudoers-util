@@ -194,7 +194,7 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
                           onChange={() => toggleTag(gi, ci, t)}
                         />
                         <span>
-                          {tagInfo(t)} (<code>{t}</code>)
+                          <span className="opt-name">{t}</span> — <HelpText>{tagInfo(t)}</HelpText>
                         </span>
                       </label>
                     </li>

@@ -12,7 +12,12 @@ export function ModalShell({ title, children, onSave, onCancel, saveDisabled }: 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label={title}>
       <div className="modal">
-        <h2>{title}</h2>
+        <div className="modal-header">
+          <h2>{title}</h2>
+          <button className="modal-close" aria-label="Close" onClick={onCancel}>
+            ×
+          </button>
+        </div>
         <div className="modal-body">{children}</div>
         <div className="modal-actions">
           <button onClick={onCancel}>Cancel</button>
