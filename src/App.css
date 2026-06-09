@@ -178,6 +178,25 @@
 .tag-list li {
   margin: 0;
 }
+.options {
+  margin: 0.5rem 0;
+}
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.3rem 0;
+}
+/* name = value inputs share the row instead of stacking full-width.
+   Same specificity as the modal width:100% rule, declared later, so it wins. */
+.modal .option-row input:not([type='checkbox']) {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+.option-row button {
+  flex: none;
+}
 .modal-actions {
   display: flex;
   justify-content: flex-end;
