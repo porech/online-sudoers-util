@@ -14,11 +14,20 @@ const KINDS: IncludeNode['includeKind'][] = ['@include', '@includedir', '#includ
 export function IncludeModal({ node, onSave, onCancel }: Props) {
   const [includeKind, setKind] = useState(node.includeKind)
   const [path, setPath] = useState(node.path)
+  const [inlineComment, setInlineComment] = useState(node.inlineComment ?? '')
   return (
     <ModalShell
       title="Include directive"
       onCancel={onCancel}
-      onSave={() => onSave({ ...node, includeKind, path, dirty: true })}
+      onSave={() =>
+        onSave({
+          ...node,
+          includeKind,
+          path,
+          dirty: true,
+          inlineComment: inlineComment.trim() === '' ? undefined : inlineComment.trim(),
+        })
+      }
       saveDisabled={path.trim() === ''}
     >
       <label>
@@ -38,6 +47,13 @@ export function IncludeModal({ node, onSave, onCancel }: Props) {
       <label>
         Path
         <input value={path} onChange={(e) => setPath(e.target.value)} />
+      </label>
+      <label>
+        Inline comment{' '}
+        <HelpText>
+          An optional comment shown after this entry on the same line (the part after #).
+        </HelpText>
+        <input value={inlineComment} onChange={(e) => setInlineComment(e.target.value)} />
       </label>
     </ModalShell>
   )

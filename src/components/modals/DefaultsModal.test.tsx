@@ -26,6 +26,24 @@ describe('DefaultsModal', () => {
     )
   })
 
+  it('clears the inline comment to undefined on save', async () => {
+    const node: DefaultsNode = {
+      kind: 'defaults',
+      raw: '',
+      dirty: false,
+      params: [],
+      inlineComment: 'keep',
+    }
+    const onSave = vi.fn()
+    render(<DefaultsModal node={node} onSave={onSave} onCancel={() => {}} />)
+    const input = screen.getByLabelText(/inline comment/i)
+    expect(input).toHaveValue('keep')
+    await userEvent.clear(input)
+    await userEvent.click(screen.getByRole('button', { name: /save/i }))
+    const saved = onSave.mock.calls[0][0] as DefaultsNode
+    expect(saved.inlineComment).toBeUndefined()
+  })
+
   it('toggles a known boolean default', async () => {
     const node: DefaultsNode = { kind: 'defaults', raw: '', dirty: false, params: [] }
     const onSave = vi.fn()

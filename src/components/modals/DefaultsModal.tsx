@@ -12,6 +12,7 @@ interface Props {
 
 export function DefaultsModal({ node, onSave, onCancel }: Props) {
   const [params, setParams] = useState<DefaultsParam[]>(node.params.map((p) => ({ ...p })))
+  const [inlineComment, setInlineComment] = useState(node.inlineComment ?? '')
 
   const find = (name: string) => params.find((p) => p.name === name)
   const upsert = (p: DefaultsParam) =>
@@ -44,7 +45,14 @@ export function DefaultsModal({ node, onSave, onCancel }: Props) {
     <ModalShell
       title="Defaults"
       onCancel={onCancel}
-      onSave={() => onSave({ ...node, params, dirty: true })}
+      onSave={() =>
+        onSave({
+          ...node,
+          params,
+          dirty: true,
+          inlineComment: inlineComment.trim() === '' ? undefined : inlineComment.trim(),
+        })
+      }
     >
       <section>
         <h3>Flags</h3>
@@ -136,6 +144,14 @@ export function DefaultsModal({ node, onSave, onCancel }: Props) {
           Add parameter
         </button>
       </section>
+
+      <label>
+        Inline comment{' '}
+        <HelpText>
+          An optional comment shown after this entry on the same line (the part after #).
+        </HelpText>
+        <input value={inlineComment} onChange={(e) => setInlineComment(e.target.value)} />
+      </label>
     </ModalShell>
   )
 }

@@ -38,6 +38,7 @@ export function AliasModal({ node, onSave, onCancel }: Props) {
   const [defs, setDefs] = useState<EditDef[]>(
     node.defs.map((d) => ({ name: d.name, itemsCsv: d.items.join(', ') })),
   )
+  const [inlineComment, setInlineComment] = useState(node.inlineComment ?? '')
 
   const setName = (i: number, name: string) =>
     setDefs((d) => d.map((x, k) => (k === i ? { ...x, name } : x)))
@@ -50,7 +51,15 @@ export function AliasModal({ node, onSave, onCancel }: Props) {
     <ModalShell
       title="Alias"
       onCancel={onCancel}
-      onSave={() => onSave({ ...node, aliasKind, defs: defs.map(toDef), dirty: true })}
+      onSave={() =>
+        onSave({
+          ...node,
+          aliasKind,
+          defs: defs.map(toDef),
+          dirty: true,
+          inlineComment: inlineComment.trim() === '' ? undefined : inlineComment.trim(),
+        })
+      }
       saveDisabled={defs.length === 0 || defs.some((d) => d.name.trim() === '')}
     >
       <label>
@@ -84,6 +93,14 @@ export function AliasModal({ node, onSave, onCancel }: Props) {
       <button type="button" onClick={addDef}>
         Add definition
       </button>
+
+      <label>
+        Inline comment{' '}
+        <HelpText>
+          An optional comment shown after this entry on the same line (the part after #).
+        </HelpText>
+        <input value={inlineComment} onChange={(e) => setInlineComment(e.target.value)} />
+      </label>
     </ModalShell>
   )
 }

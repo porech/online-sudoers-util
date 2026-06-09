@@ -25,4 +25,24 @@ describe('AliasModal', () => {
       }),
     )
   })
+
+  it('renders and round-trips an inline comment on save', async () => {
+    const node: AliasNode = {
+      kind: 'alias',
+      raw: '',
+      dirty: false,
+      aliasKind: 'User_Alias',
+      defs: [{ name: 'ADMINS', items: ['alice'] }],
+      inlineComment: 'note',
+    }
+    const onSave = vi.fn()
+    render(<AliasModal node={node} onSave={onSave} onCancel={() => {}} />)
+    const input = screen.getByLabelText(/inline comment/i)
+    expect(input).toHaveValue('note')
+    await userEvent.clear(input)
+    await userEvent.type(input, 'updated')
+    await userEvent.click(screen.getByRole('button', { name: /save/i }))
+    const saved = onSave.mock.calls[0][0] as AliasNode
+    expect(saved.inlineComment).toBe('updated')
+  })
 })
