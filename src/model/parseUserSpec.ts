@@ -1,4 +1,235 @@
-import type { Line } from './types'
-export function parseUserSpec(_raw: string, _line: number): Line {
-  throw new Error('parseUserSpec not implemented') // Replaced in Task 6.1
+import type { Line, UserSpecNode, SpecGroup, CmndSpec, RunasSpec, Tag, CmndOption } from './types'
+import { tokenize } from './tokenizer'
+import { splitTopLevel } from './parseDefaults'
+import { isTag } from './catalog'
+
+export function parseUserSpec(raw: string, _line: number): Line {
+  const { inlineComment } = tokenize(raw)
+  const work = stripInlineComment(raw.trim())
+
+  // Split "userlist hostgroup=cmnds [: hostgroup=cmnds]*"
+  // The first whitespace run after the user list separates users from the rest.
+  const firstSpace = indexOfTopLevelSpace(work)
+  if (firstSpace === -1) throw new Error('user spec missing host/command section')
+
+  const usersPart = work.slice(0, firstSpace).trim()
+  const remainder = work.slice(firstSpace + 1).trim()
+  const users = splitTopLevel(usersPart, ',').map((s) => s.trim()).filter(Boolean)
+
+  const groups: SpecGroup[] = splitSpecGroups(remainder)
+    .map((seg) => parseSpecGroup(seg.trim()))
+
+  const node: UserSpecNode = { kind: 'userspec', raw, dirty: false, users, specGroups: groups }
+  if (inlineComment !== undefined) node.inlineComment = inlineComment
+  return node
+}
+
+function parseSpecGroup(seg: string): SpecGroup {
+  const eq = seg.indexOf('=')
+  if (eq === -1) throw new Error(`spec group missing '=': ${seg}`)
+  const hosts = splitTopLevel(seg.slice(0, eq), ',').map((s) => s.trim()).filter(Boolean)
+  const cmndPart = seg.slice(eq + 1).trim()
+  const cmndSpecs = parseCmndSpecList(cmndPart)
+  return { hosts, cmndSpecs }
+}
+
+function parseCmndSpecList(s: string): CmndSpec[] {
+  const segments = splitTopLevel(s, ',').map((x) => x.trim()).filter(Boolean)
+  let inheritedRunas: RunasSpec | undefined
+  let inheritedTags: Tag[] = []
+  const specs: CmndSpec[] = []
+
+  for (const seg of segments) {
+    const parsed = parseOneCmndSpec(seg)
+    if (parsed.runas) inheritedRunas = parsed.runas
+    // tags accumulate/override: a present tag replaces; we merge by name family.
+    inheritedTags = mergeTags(inheritedTags, parsed.tags)
+
+    const spec: CmndSpec = {
+      tags: [...inheritedTags],
+      options: parsed.options,
+      command: parsed.command,
+    }
+    if (inheritedRunas) spec.runas = { users: [...inheritedRunas.users], groups: [...inheritedRunas.groups] }
+    specs.push(spec)
+  }
+  return specs
+}
+
+interface RawCmndSpec {
+  runas?: RunasSpec
+  tags: Tag[]
+  options: CmndOption[]
+  command: string
+}
+
+function parseOneCmndSpec(seg: string): RawCmndSpec {
+  let rest = seg
+  let runas: RunasSpec | undefined
+  const tags: Tag[] = []
+  const options: CmndOption[] = []
+
+  // Optional runas at the start: (users:groups)
+  const runasMatch = /^\(([^)]*)\)\s*(.*)$/.exec(rest)
+  if (runasMatch) {
+    runas = parseRunas(runasMatch[1])
+    rest = runasMatch[2].trim()
+  }
+
+  // Leading "TAG:" tokens and "OPTION=value" tokens, then the command.
+  // Tags are of the form WORD followed by ':'. Options are WORD=value.
+  // Loop consuming prefix tokens.
+  for (;;) {
+    const tagMatch = /^([A-Z_]+)\s*:\s*(.*)$/.exec(rest)
+    if (tagMatch && isTag(tagMatch[1])) {
+      tags.push(tagMatch[1] as Tag)
+      rest = tagMatch[2].trim()
+      continue
+    }
+    const optMatch = /^([A-Z_]+)=("[^"]*"|\S+)\s+(.*)$/.exec(rest)
+    if (optMatch) {
+      options.push({ name: optMatch[1], value: optMatch[2] })
+      rest = optMatch[3].trim()
+      continue
+    }
+    break
+  }
+
+  return { runas, tags, options, command: rest.trim() }
+}
+
+function parseRunas(inside: string): RunasSpec {
+  const colon = splitTopLevel(inside, ':')
+  const users = splitTopLevel(colon[0] ?? '', ',').map((s) => s.trim()).filter(Boolean)
+  const groups = colon.length > 1
+    ? splitTopLevel(colon[1], ',').map((s) => s.trim()).filter(Boolean)
+    : []
+  return { users, groups }
+}
+
+// Replace any tag with its opposite if present; otherwise append.
+function mergeTags(base: Tag[], incoming: Tag[]): Tag[] {
+  const opposite: Partial<Record<Tag, Tag>> = {
+    NOPASSWD: 'PASSWD', PASSWD: 'NOPASSWD',
+    NOEXEC: 'EXEC', EXEC: 'NOEXEC',
+    SETENV: 'NOSETENV', NOSETENV: 'SETENV',
+    LOG_INPUT: 'NOLOG_INPUT', NOLOG_INPUT: 'LOG_INPUT',
+    LOG_OUTPUT: 'NOLOG_OUTPUT', NOLOG_OUTPUT: 'LOG_OUTPUT',
+    MAIL: 'NOMAIL', NOMAIL: 'MAIL',
+    FOLLOW: 'NOFOLLOW', NOFOLLOW: 'FOLLOW',
+    INTERCEPT: 'NOINTERCEPT', NOINTERCEPT: 'INTERCEPT',
+  }
+  const result = [...base]
+  for (const t of incoming) {
+    const opp = opposite[t]
+    const filtered = result.filter((x) => x !== t && x !== opp)
+    filtered.push(t)
+    result.length = 0
+    result.push(...filtered)
+  }
+  return result
+}
+
+// Split the remainder of a UserSpec into SpecGroup segments.
+// A structural ':' separates HostList=CmndSpecList groups.
+// Tags also use ':', but they appear inside CmndSpecList (after the '=').
+// Strategy: collect top-level '=' positions, then find the structural ':' boundaries.
+// A ':' is structural when it is NOT inside a tag (i.e. it is followed, after whitespace,
+// by content that contains a top-level '=' — meaning a new host=cmnds group starts).
+function splitSpecGroups(s: string): string[] {
+  // Find all top-level '=' positions
+  const eqPositions = topLevelPositions(s, '=')
+  if (eqPositions.length === 0) return [s]
+
+  // Find all top-level ':' positions
+  const colonPositions = topLevelPositions(s, ':')
+
+  // A colon at position p is structural if there is an '=' after p (i.e. a new group).
+  // The structural colons are those that come BEFORE an '='.
+  // For N equals signs, there are N-1 structural colons (one per additional group).
+  // The structural colons are the ones between consecutive eq positions:
+  // specifically, the LAST colon that appears before each eq position (except the first).
+  const structuralColons: number[] = []
+  for (let i = 1; i < eqPositions.length; i++) {
+    const eq = eqPositions[i]
+    // find the last colon before this eq
+    const candidates = colonPositions.filter((c) => c < eq && (i === 1 || c > eqPositions[i - 1]))
+    if (candidates.length > 0) {
+      structuralColons.push(candidates[candidates.length - 1])
+    }
+  }
+
+  if (structuralColons.length === 0) return [s]
+
+  const result: string[] = []
+  let prev = 0
+  for (const sc of structuralColons) {
+    result.push(s.slice(prev, sc))
+    prev = sc + 1
+  }
+  result.push(s.slice(prev))
+  return result
+}
+
+// Return positions of all top-level (not in quotes/parens) occurrences of char in s.
+function topLevelPositions(s: string, char: string): number[] {
+  const positions: number[] = []
+  let inD = false, inS = false, inParen = 0
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]
+    if (c === '\\' && i + 1 < s.length) { i++; continue }
+    if (c === '"' && !inS) { inD = !inD; continue }
+    if (c === "'" && !inD) { inS = !inS; continue }
+    if (!inD && !inS) {
+      if (c === '(') { inParen++; continue }
+      if (c === ')') { inParen--; continue }
+      if (inParen === 0 && c === char) positions.push(i)
+    }
+  }
+  return positions
+}
+
+// Like splitTopLevel but also skips content inside parentheses.
+function splitTopLevelParen(s: string, delim: string): string[] {
+  const out: string[] = []
+  let cur = ''
+  let inD = false, inS = false, inParen = 0
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]
+    if (c === '\\' && i + 1 < s.length) { cur += c + s[i + 1]; i++; continue }
+    if (c === '"' && !inS) inD = !inD
+    else if (c === "'" && !inD) inS = !inS
+    else if (c === '(' && !inD && !inS) inParen++
+    else if (c === ')' && !inD && !inS) inParen--
+    if (c === delim && !inD && !inS && inParen === 0) { out.push(cur); cur = ''; continue }
+    cur += c
+  }
+  out.push(cur)
+  return out
+}
+
+function indexOfTopLevelSpace(s: string): number {
+  let inD = false, inS = false, inParen = 0
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]
+    if (c === '\\' && i + 1 < s.length) { i++; continue }
+    if (c === '"' && !inS) inD = !inD
+    else if (c === "'" && !inD) inS = !inS
+    else if (c === '(' && !inD && !inS) inParen++
+    else if (c === ')' && !inD && !inS) inParen--
+    else if ((c === ' ' || c === '\t') && !inD && !inS && inParen === 0) return i
+  }
+  return -1
+}
+
+function stripInlineComment(s: string): string {
+  let inD = false, inS = false
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]
+    if (c === '\\' && i + 1 < s.length) { i++; continue }
+    if (c === '"' && !inS) inD = !inD
+    else if (c === "'" && !inD) inS = !inS
+    else if (c === '#' && !inD && !inS) return s.slice(0, i).trim()
+  }
+  return s
 }
