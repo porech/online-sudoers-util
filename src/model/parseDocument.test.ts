@@ -15,9 +15,17 @@ describe('parseDocument', () => {
     const doc = parseDocument(text)
     const kinds = doc.lines.map((l) => l.kind)
     expect(kinds).toEqual([
-      'comment', 'defaults', 'defaults', 'blank',
-      'alias', 'alias', 'blank',
-      'userspec', 'userspec', 'userspec', 'include',
+      'comment',
+      'defaults',
+      'defaults',
+      'blank',
+      'alias',
+      'alias',
+      'blank',
+      'userspec',
+      'userspec',
+      'userspec',
+      'include',
       'blank',
     ])
     expect(doc.lines.some((l) => l.kind === 'error')).toBe(false)

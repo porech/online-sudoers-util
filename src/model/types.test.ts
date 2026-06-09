@@ -9,7 +9,12 @@ describe('model types', () => {
       dirty: false,
       users: ['root'],
       specGroups: [
-        { hosts: ['ALL'], cmndSpecs: [{ runas: { users: ['ALL'], groups: [] }, tags: [], options: [], command: 'ALL' }] },
+        {
+          hosts: ['ALL'],
+          cmndSpecs: [
+            { runas: { users: ['ALL'], groups: [] }, tags: [], options: [], command: 'ALL' },
+          ],
+        },
       ],
     }
     expect(isUserSpec(line)).toBe(true)

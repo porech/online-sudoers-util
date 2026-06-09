@@ -1,19 +1,38 @@
 import type {
-  Line, DefaultsNode, DefaultsParam, AliasNode,
-  UserSpecNode, SpecGroup, CmndSpec, RunasSpec, Tag,
+  Line,
+  DefaultsNode,
+  DefaultsParam,
+  AliasNode,
+  UserSpecNode,
+  SpecGroup,
+  CmndSpec,
+  RunasSpec,
+  Tag,
   SudoersDocument,
 } from './types'
 
 export function serializeLine(line: Line): string {
   let body: string
   switch (line.kind) {
-    case 'blank': return line.raw === '' ? '' : line.raw
-    case 'comment': body = `# ${line.text}`; return body // comments have no inline comment
-    case 'include': body = `${line.includeKind} ${line.path}`; break
-    case 'defaults': body = serializeDefaults(line); break
-    case 'error': return line.raw
-    case 'alias': body = serializeAlias(line); break
-    case 'userspec': body = serializeUserSpec(line); break
+    case 'blank':
+      return line.raw === '' ? '' : line.raw
+    case 'comment':
+      body = `# ${line.text}`
+      return body // comments have no inline comment
+    case 'include':
+      body = `${line.includeKind} ${line.path}`
+      break
+    case 'defaults':
+      body = serializeDefaults(line)
+      break
+    case 'error':
+      return line.raw
+    case 'alias':
+      body = serializeAlias(line)
+      break
+    case 'userspec':
+      body = serializeUserSpec(line)
+      break
   }
   return appendInline(body, line.inlineComment)
 }
@@ -36,9 +55,7 @@ function serializeParam(p: DefaultsParam): string {
 }
 
 function serializeAlias(n: AliasNode): string {
-  const defs = n.defs
-    .map((d) => `${d.name} = ${d.items.join(', ')}`)
-    .join(' : ')
+  const defs = n.defs.map((d) => `${d.name} = ${d.items.join(', ')}`).join(' : ')
   return `${n.aliasKind} ${defs}`
 }
 
@@ -81,7 +98,5 @@ function serializeRunas(r: RunasSpec): string {
 }
 
 export function serializeDocument(doc: SudoersDocument): string {
-  return doc.lines
-    .map((line) => (line.dirty ? serializeLine(line) : line.raw))
-    .join('\n')
+  return doc.lines.map((line) => (line.dirty ? serializeLine(line) : line.raw)).join('\n')
 }

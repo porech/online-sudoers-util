@@ -16,7 +16,9 @@ export function parseAlias(raw: string, _line: number): Line {
     const eq = segment.indexOf('=')
     if (eq === -1) throw new Error(`alias definition missing '=': ${segment.trim()}`)
     const name = segment.slice(0, eq).trim()
-    const items = splitTopLevel(segment.slice(eq + 1), ',').map((s) => s.trim()).filter((s) => s !== '')
+    const items = splitTopLevel(segment.slice(eq + 1), ',')
+      .map((s) => s.trim())
+      .filter((s) => s !== '')
     return { name, items }
   })
 
@@ -30,7 +32,10 @@ function stripInlineComment(s: string): string {
   let inS = false
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
-    if (c === '\\' && i + 1 < s.length) { i++; continue }
+    if (c === '\\' && i + 1 < s.length) {
+      i++
+      continue
+    }
     if (c === '"' && !inS) inD = !inD
     else if (c === "'" && !inD) inS = !inS
     else if (c === '#' && !inD && !inS) return s.slice(0, i).trim()

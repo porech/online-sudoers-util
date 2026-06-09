@@ -12,26 +12,94 @@ export interface DefaultInfo {
 // preserved and shown in the "Additional parameters" section of the UI.
 const DEFAULTS: DefaultInfo[] = [
   { name: 'requiretty', type: 'flag', description: 'Require a real tty (not a pipe) to run sudo.' },
-  { name: 'visiblepw', type: 'flag', description: 'Allow sudo to prompt for a password even when it would be echoed (no terminal).' },
-  { name: 'always_set_home', type: 'flag', description: 'Set HOME to the target user’s home directory.' },
-  { name: 'env_reset', type: 'flag', description: 'Reset the environment to a minimal set of variables.' },
-  { name: 'mail_badpass', type: 'flag', description: 'Send mail to mailto when a user enters the wrong password.' },
-  { name: 'insults', type: 'flag', description: 'Insult the user when they type an incorrect password.' },
-  { name: 'rootpw', type: 'flag', description: 'Prompt for the root password instead of the invoking user’s.' },
-  { name: 'targetpw', type: 'flag', description: 'Prompt for the target user’s password instead of the invoking user’s.' },
-  { name: 'use_pty', type: 'flag', description: 'Run the command in a pseudo-terminal even when logging is not enabled.' },
-  { name: 'secure_path', type: 'string', description: 'Path used for every command run by sudo, overriding the user’s PATH.' },
+  {
+    name: 'visiblepw',
+    type: 'flag',
+    description: 'Allow sudo to prompt for a password even when it would be echoed (no terminal).',
+  },
+  {
+    name: 'always_set_home',
+    type: 'flag',
+    description: 'Set HOME to the target user’s home directory.',
+  },
+  {
+    name: 'env_reset',
+    type: 'flag',
+    description: 'Reset the environment to a minimal set of variables.',
+  },
+  {
+    name: 'mail_badpass',
+    type: 'flag',
+    description: 'Send mail to mailto when a user enters the wrong password.',
+  },
+  {
+    name: 'insults',
+    type: 'flag',
+    description: 'Insult the user when they type an incorrect password.',
+  },
+  {
+    name: 'rootpw',
+    type: 'flag',
+    description: 'Prompt for the root password instead of the invoking user’s.',
+  },
+  {
+    name: 'targetpw',
+    type: 'flag',
+    description: 'Prompt for the target user’s password instead of the invoking user’s.',
+  },
+  {
+    name: 'use_pty',
+    type: 'flag',
+    description: 'Run the command in a pseudo-terminal even when logging is not enabled.',
+  },
+  {
+    name: 'secure_path',
+    type: 'string',
+    description: 'Path used for every command run by sudo, overriding the user’s PATH.',
+  },
   { name: 'editor', type: 'string', description: 'Path(s) to the editor used by sudoedit/visudo.' },
   { name: 'mailto', type: 'string', description: 'Address that receives sudo notification mail.' },
-  { name: 'badpass_message', type: 'string', description: 'Message shown when an incorrect password is entered.' },
-  { name: 'lecture', type: 'string', description: 'When to show the sudo lecture: never, once, or always.' },
+  {
+    name: 'badpass_message',
+    type: 'string',
+    description: 'Message shown when an incorrect password is entered.',
+  },
+  {
+    name: 'lecture',
+    type: 'string',
+    description: 'When to show the sudo lecture: never, once, or always.',
+  },
   { name: 'logfile', type: 'string', description: 'Path to the sudo log file.' },
-  { name: 'passwd_tries', type: 'integer', description: 'Number of password attempts allowed before failure.' },
-  { name: 'timestamp_timeout', type: 'integer', description: 'Minutes before sudo re-prompts for a password.' },
-  { name: 'passwd_timeout', type: 'integer', description: 'Minutes before the password prompt times out (0 = no timeout).' },
-  { name: 'env_keep', type: 'list', description: 'Environment variables preserved from the user’s environment.' },
-  { name: 'env_check', type: 'list', description: 'Environment variables kept only if they pass a safety check.' },
-  { name: 'env_delete', type: 'list', description: 'Environment variables removed before running a command.' },
+  {
+    name: 'passwd_tries',
+    type: 'integer',
+    description: 'Number of password attempts allowed before failure.',
+  },
+  {
+    name: 'timestamp_timeout',
+    type: 'integer',
+    description: 'Minutes before sudo re-prompts for a password.',
+  },
+  {
+    name: 'passwd_timeout',
+    type: 'integer',
+    description: 'Minutes before the password prompt times out (0 = no timeout).',
+  },
+  {
+    name: 'env_keep',
+    type: 'list',
+    description: 'Environment variables preserved from the user’s environment.',
+  },
+  {
+    name: 'env_check',
+    type: 'list',
+    description: 'Environment variables kept only if they pass a safety check.',
+  },
+  {
+    name: 'env_delete',
+    type: 'list',
+    description: 'Environment variables removed before running a command.',
+  },
 ]
 
 const DEFAULTS_MAP = new Map(DEFAULTS.map((d) => [d.name, d]))

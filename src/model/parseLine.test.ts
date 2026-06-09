@@ -9,7 +9,10 @@ describe('parseLine: blank & comment', () => {
 
   it('parses a standalone comment', () => {
     expect(parseLine('# hello world', 3)).toEqual({
-      kind: 'comment', raw: '# hello world', dirty: false, text: 'hello world',
+      kind: 'comment',
+      raw: '# hello world',
+      dirty: false,
+      text: 'hello world',
     })
   })
 

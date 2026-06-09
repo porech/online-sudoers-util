@@ -1,8 +1,20 @@
 export type Tag =
-  | 'NOPASSWD' | 'PASSWD' | 'NOEXEC' | 'EXEC'
-  | 'SETENV' | 'NOSETENV' | 'LOG_INPUT' | 'NOLOG_INPUT'
-  | 'LOG_OUTPUT' | 'NOLOG_OUTPUT' | 'MAIL' | 'NOMAIL'
-  | 'FOLLOW' | 'NOFOLLOW' | 'INTERCEPT' | 'NOINTERCEPT'
+  | 'NOPASSWD'
+  | 'PASSWD'
+  | 'NOEXEC'
+  | 'EXEC'
+  | 'SETENV'
+  | 'NOSETENV'
+  | 'LOG_INPUT'
+  | 'NOLOG_INPUT'
+  | 'LOG_OUTPUT'
+  | 'NOLOG_OUTPUT'
+  | 'MAIL'
+  | 'NOMAIL'
+  | 'FOLLOW'
+  | 'NOFOLLOW'
+  | 'INTERCEPT'
+  | 'NOINTERCEPT'
 
 export interface RunasSpec {
   users: string[]
@@ -10,7 +22,7 @@ export interface RunasSpec {
 }
 
 export interface CmndOption {
-  name: string   // e.g. CWD, TIMEOUT, CHROOT
+  name: string // e.g. CWD, TIMEOUT, CHROOT
   value: string
 }
 
@@ -90,8 +102,13 @@ export interface ErrorNode extends Base {
 }
 
 export type Line =
-  | UserSpecNode | AliasNode | DefaultsNode | IncludeNode
-  | CommentNode | BlankNode | ErrorNode
+  | UserSpecNode
+  | AliasNode
+  | DefaultsNode
+  | IncludeNode
+  | CommentNode
+  | BlankNode
+  | ErrorNode
 
 export interface SudoersDocument {
   lines: Line[]

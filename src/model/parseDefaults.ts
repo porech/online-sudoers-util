@@ -21,7 +21,11 @@ export function parseDefaults(raw: string, _line: number): Line {
   const params = body === '' ? [] : splitTopLevel(body, ',').map(parseParam)
 
   const node: DefaultsNode = {
-    kind: 'defaults', raw, dirty: false, binding, params,
+    kind: 'defaults',
+    raw,
+    dirty: false,
+    binding,
+    params,
   }
   if (inlineComment !== undefined) node.inlineComment = inlineComment
   return node
@@ -59,10 +63,18 @@ export function splitTopLevel(s: string, delim: string): string[] {
   let inS = false
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
-    if (c === '\\' && i + 1 < s.length) { cur += c + s[i + 1]; i++; continue }
+    if (c === '\\' && i + 1 < s.length) {
+      cur += c + s[i + 1]
+      i++
+      continue
+    }
     if (c === '"' && !inS) inD = !inD
     else if (c === "'" && !inD) inS = !inS
-    if (c === delim && !inD && !inS) { out.push(cur); cur = ''; continue }
+    if (c === delim && !inD && !inS) {
+      out.push(cur)
+      cur = ''
+      continue
+    }
     cur += c
   }
   out.push(cur)
@@ -74,7 +86,10 @@ function stripInlineComment(s: string): string {
   let inS = false
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
-    if (c === '\\' && i + 1 < s.length) { i++; continue }
+    if (c === '\\' && i + 1 < s.length) {
+      i++
+      continue
+    }
     if (c === '"' && !inS) inD = !inD
     else if (c === "'" && !inD) inS = !inS
     else if (c === '#' && !inD && !inS) return s.slice(0, i).trim()

@@ -14,7 +14,9 @@ export function parseUserSpec(raw: string, _line: number): Line {
 
   const usersPart = work.slice(0, firstSpace).trim()
   const remainder = work.slice(firstSpace + 1).trim()
-  const users = splitTopLevel(usersPart, ',').map((s) => s.trim()).filter(Boolean)
+  const users = splitTopLevel(usersPart, ',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 
   const groups: SpecGroup[] = splitSpecGroups(remainder).map((seg) => parseSpecGroup(seg.trim()))
 
@@ -26,7 +28,9 @@ export function parseUserSpec(raw: string, _line: number): Line {
 function parseSpecGroup(seg: string): SpecGroup {
   const eq = seg.indexOf('=')
   if (eq === -1) throw new Error(`spec group missing '=': ${seg}`)
-  const hosts = splitTopLevel(seg.slice(0, eq), ',').map((s) => s.trim()).filter(Boolean)
+  const hosts = splitTopLevel(seg.slice(0, eq), ',')
+    .map((s) => s.trim())
+    .filter(Boolean)
   const cmndPart = seg.slice(eq + 1).trim()
   const cmndSpecs = parseCmndSpecList(cmndPart)
   return { hosts, cmndSpecs }
@@ -35,7 +39,9 @@ function parseSpecGroup(seg: string): SpecGroup {
 function parseCmndSpecList(s: string): CmndSpec[] {
   // Split on top-level commas, skipping commas inside a runas spec's parentheses
   // (e.g. "(root, daemon) /bin/a" is ONE command spec, not two).
-  const segments = splitTopLevelParen(s, ',').map((x) => x.trim()).filter(Boolean)
+  const segments = splitTopLevelParen(s, ',')
+    .map((x) => x.trim())
+    .filter(Boolean)
   let inheritedRunas: RunasSpec | undefined
   let inheritedTags: Tag[] = []
   const specs: CmndSpec[] = []
@@ -51,7 +57,8 @@ function parseCmndSpecList(s: string): CmndSpec[] {
       options: parsed.options,
       command: parsed.command,
     }
-    if (inheritedRunas) spec.runas = { users: [...inheritedRunas.users], groups: [...inheritedRunas.groups] }
+    if (inheritedRunas)
+      spec.runas = { users: [...inheritedRunas.users], groups: [...inheritedRunas.groups] }
     specs.push(spec)
   }
   return specs
@@ -101,24 +108,37 @@ function parseOneCmndSpec(seg: string): RawCmndSpec {
 
 function parseRunas(inside: string): RunasSpec {
   const colon = splitTopLevel(inside, ':')
-  const users = splitTopLevel(colon[0] ?? '', ',').map((s) => s.trim()).filter(Boolean)
-  const groups = colon.length > 1
-    ? splitTopLevel(colon[1], ',').map((s) => s.trim()).filter(Boolean)
-    : []
+  const users = splitTopLevel(colon[0] ?? '', ',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  const groups =
+    colon.length > 1
+      ? splitTopLevel(colon[1], ',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : []
   return { users, groups }
 }
 
 // Replace any tag with its opposite if present; otherwise append.
 function mergeTags(base: Tag[], incoming: Tag[]): Tag[] {
   const opposite: Partial<Record<Tag, Tag>> = {
-    NOPASSWD: 'PASSWD', PASSWD: 'NOPASSWD',
-    NOEXEC: 'EXEC', EXEC: 'NOEXEC',
-    SETENV: 'NOSETENV', NOSETENV: 'SETENV',
-    LOG_INPUT: 'NOLOG_INPUT', NOLOG_INPUT: 'LOG_INPUT',
-    LOG_OUTPUT: 'NOLOG_OUTPUT', NOLOG_OUTPUT: 'LOG_OUTPUT',
-    MAIL: 'NOMAIL', NOMAIL: 'MAIL',
-    FOLLOW: 'NOFOLLOW', NOFOLLOW: 'FOLLOW',
-    INTERCEPT: 'NOINTERCEPT', NOINTERCEPT: 'INTERCEPT',
+    NOPASSWD: 'PASSWD',
+    PASSWD: 'NOPASSWD',
+    NOEXEC: 'EXEC',
+    EXEC: 'NOEXEC',
+    SETENV: 'NOSETENV',
+    NOSETENV: 'SETENV',
+    LOG_INPUT: 'NOLOG_INPUT',
+    NOLOG_INPUT: 'LOG_INPUT',
+    LOG_OUTPUT: 'NOLOG_OUTPUT',
+    NOLOG_OUTPUT: 'LOG_OUTPUT',
+    MAIL: 'NOMAIL',
+    NOMAIL: 'MAIL',
+    FOLLOW: 'NOFOLLOW',
+    NOFOLLOW: 'FOLLOW',
+    INTERCEPT: 'NOINTERCEPT',
+    NOINTERCEPT: 'INTERCEPT',
   }
   const result = [...base]
   for (const t of incoming) {
@@ -146,12 +166,27 @@ function splitSpecGroups(s: string): string[] {
   let inParen = 0
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
-    if (c === '\\' && i + 1 < s.length) { i++; continue }
-    if (c === '"' && !inS) { inD = !inD; continue }
-    if (c === "'" && !inD) { inS = !inS; continue }
+    if (c === '\\' && i + 1 < s.length) {
+      i++
+      continue
+    }
+    if (c === '"' && !inS) {
+      inD = !inD
+      continue
+    }
+    if (c === "'" && !inD) {
+      inS = !inS
+      continue
+    }
     if (inD || inS) continue
-    if (c === '(') { inParen++; continue }
-    if (c === ')') { if (inParen > 0) inParen--; continue }
+    if (c === '(') {
+      inParen++
+      continue
+    }
+    if (c === ')') {
+      if (inParen > 0) inParen--
+      continue
+    }
     if (c === ':' && inParen === 0 && !isTagColon(s, i)) {
       result.push(s.slice(segStart, i))
       segStart = i + 1
@@ -180,12 +215,20 @@ function splitTopLevelParen(s: string, delim: string): string[] {
   let inParen = 0
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
-    if (c === '\\' && i + 1 < s.length) { cur += c + s[i + 1]; i++; continue }
+    if (c === '\\' && i + 1 < s.length) {
+      cur += c + s[i + 1]
+      i++
+      continue
+    }
     if (c === '"' && !inS) inD = !inD
     else if (c === "'" && !inD) inS = !inS
     else if (c === '(' && !inD && !inS) inParen++
     else if (c === ')' && !inD && !inS) inParen--
-    if (c === delim && !inD && !inS && inParen === 0) { out.push(cur); cur = ''; continue }
+    if (c === delim && !inD && !inS && inParen === 0) {
+      out.push(cur)
+      cur = ''
+      continue
+    }
     cur += c
   }
   out.push(cur)
@@ -198,7 +241,10 @@ function indexOfTopLevelSpace(s: string): number {
   let inParen = 0
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
-    if (c === '\\' && i + 1 < s.length) { i++; continue }
+    if (c === '\\' && i + 1 < s.length) {
+      i++
+      continue
+    }
     if (c === '"' && !inS) inD = !inD
     else if (c === "'" && !inD) inS = !inS
     else if (c === '(' && !inD && !inS) inParen++
@@ -213,7 +259,10 @@ function stripInlineComment(s: string): string {
   let inS = false
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
-    if (c === '\\' && i + 1 < s.length) { i++; continue }
+    if (c === '\\' && i + 1 < s.length) {
+      i++
+      continue
+    }
     if (c === '"' && !inS) inD = !inD
     else if (c === "'" && !inD) inS = !inS
     else if (c === '#' && !inD && !inS) return s.slice(0, i).trim()

@@ -13,7 +13,11 @@ interface Envelope {
 }
 
 function emptyEnvelope(): Envelope {
-  return { version: 1, activeSessionId: 'default', sessions: { default: { name: 'Untitled', text: '', updatedAt: 0 } } }
+  return {
+    version: 1,
+    activeSessionId: 'default',
+    sessions: { default: { name: 'Untitled', text: '', updatedAt: 0 } },
+  }
 }
 
 function read(): Envelope {

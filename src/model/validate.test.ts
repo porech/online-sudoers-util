@@ -7,7 +7,10 @@ describe('validateDocument', () => {
     const doc = parseDocument('alice ALL = WEBADMIN_CMNDS')
     const warnings = validateDocument(doc)
     expect(warnings).toEqual([
-      { lineIndex: 0, message: 'Command "WEBADMIN_CMNDS" looks like an alias but no Cmnd_Alias defines it.' },
+      {
+        lineIndex: 0,
+        message: 'Command "WEBADMIN_CMNDS" looks like an alias but no Cmnd_Alias defines it.',
+      },
     ])
   })
 

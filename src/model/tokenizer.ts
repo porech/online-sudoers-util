@@ -34,8 +34,16 @@ export function tokenize(line: string): TokenizeResult {
       i++
       continue
     }
-    if (c === '"' && !inSquote) { inDquote = !inDquote; cur += c; continue }
-    if (c === "'" && !inDquote) { inSquote = !inSquote; cur += c; continue }
+    if (c === '"' && !inSquote) {
+      inDquote = !inDquote
+      cur += c
+      continue
+    }
+    if (c === "'" && !inDquote) {
+      inSquote = !inSquote
+      cur += c
+      continue
+    }
 
     if (!inDquote && !inSquote) {
       if (c === '#' && !isInclude) {
@@ -43,8 +51,15 @@ export function tokenize(line: string): TokenizeResult {
         inlineComment = line.slice(i + 1).trim()
         return { tokens, inlineComment: inlineComment === '' ? '' : inlineComment }
       }
-      if (c === ' ' || c === '\t') { push(); continue }
-      if (STRUCT.has(c)) { push(); tokens.push(c); continue }
+      if (c === ' ' || c === '\t') {
+        push()
+        continue
+      }
+      if (STRUCT.has(c)) {
+        push()
+        tokens.push(c)
+        continue
+      }
     }
     cur += c
   }

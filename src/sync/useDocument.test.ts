@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useDocument } from './useDocument'
+import type { UserSpecNode } from '../model/types'
 
 describe('useDocument', () => {
   beforeEach(() => localStorage.clear())
@@ -23,10 +24,14 @@ describe('useDocument', () => {
     const { result } = renderHook(() => useDocument('root ALL=(ALL) ALL'))
     act(() =>
       result.current.updateLine(0, {
-        kind: 'userspec', raw: '', dirty: true,
+        kind: 'userspec',
+        raw: '',
+        dirty: true,
         users: ['root', 'alice'],
-        specGroups: result.current.doc.lines[0].kind === 'userspec'
-          ? (result.current.doc.lines[0] as any).specGroups : [],
+        specGroups:
+          result.current.doc.lines[0].kind === 'userspec'
+            ? (result.current.doc.lines[0] as UserSpecNode).specGroups
+            : [],
       }),
     )
     expect(result.current.text).toContain('root, alice')

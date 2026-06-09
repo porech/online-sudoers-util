@@ -13,7 +13,8 @@ describe('serializeLine: defaults', () => {
 
   it('appends an inline comment', () => {
     const n = parseDefaults('Defaults env_reset', 1)
-    ;(n as any).inlineComment = 'baseline'
+    if (n.kind !== 'defaults') throw new Error('expected defaults')
+    n.inlineComment = 'baseline'
     expect(serializeLine(n)).toBe('Defaults env_reset # baseline')
   })
 
