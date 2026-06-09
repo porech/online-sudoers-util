@@ -16,6 +16,22 @@
     />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#1f6feb" />
+
+    <script>
+      // Set the theme before paint to avoid a light flash on dark systems.
+      try {
+        var stored = localStorage.getItem('online-sudoers-util-theme')
+        var theme =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+        document.documentElement.dataset.theme = theme
+      } catch (e) {
+        // localStorage / matchMedia may be unavailable; fall back to default light theme.
+      }
+    </script>
     <link rel="canonical" href="https://porech.github.io/online-sudoers-util/" />
 
     <!-- Open Graph -->
