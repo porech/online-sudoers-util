@@ -26,6 +26,7 @@ export default function App() {
   const docState = useDocument(loadActiveText())
   const { doc, text, warnings } = docState
   const [editing, setEditing] = useState<{ index: number } | null>(null)
+  const [hideNoise, setHideNoise] = useState(false)
 
   const openEditor = (index: number) => setEditing({ index })
   const closeModal = () => setEditing(null)
@@ -85,6 +86,14 @@ export default function App() {
         </section>
         <section className="pane">
           <AddEntryMenu onAdd={onAdd} />
+          <label>
+            <input
+              type="checkbox"
+              checked={hideNoise}
+              onChange={(e) => setHideNoise(e.target.checked)}
+            />{' '}
+            Hide comments &amp; blanks
+          </label>
           <Table
             doc={doc}
             warnings={warnings}
@@ -92,6 +101,7 @@ export default function App() {
             onDelete={docState.removeLine}
             onDuplicate={(i) => docState.addLine({ ...doc.lines[i], dirty: true })}
             onMove={docState.moveLine}
+            hideNoise={hideNoise}
           />
         </section>
       </main>

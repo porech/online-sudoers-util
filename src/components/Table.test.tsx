@@ -38,4 +38,26 @@ describe('Table', () => {
     await userEvent.click(screen.getAllByRole('button', { name: /^edit row/i })[1])
     expect(onEdit).toHaveBeenCalledWith(1)
   })
+
+  it('hides comments and blanks when hideNoise is set but preserves indices', async () => {
+    const noisyDoc = parseDocument('# header\nroot ALL=(ALL) ALL\n\n')
+    const onEdit = vi.fn()
+    render(
+      <Table
+        doc={noisyDoc}
+        warnings={[]}
+        onEdit={onEdit}
+        onDelete={() => {}}
+        onDuplicate={() => {}}
+        onMove={() => {}}
+        hideNoise
+      />,
+    )
+    expect(screen.queryByText('Comment')).not.toBeInTheDocument()
+    expect(screen.queryByText('Blank')).not.toBeInTheDocument()
+    expect(screen.getByText('User spec')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /^edit row/i }))
+    expect(onEdit).toHaveBeenCalledWith(1)
+  })
 })

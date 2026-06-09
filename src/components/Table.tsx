@@ -9,9 +9,18 @@ interface TableProps {
   onDelete: (index: number) => void
   onDuplicate: (index: number) => void
   onMove: (index: number, delta: number) => void
+  hideNoise?: boolean
 }
 
-export function Table({ doc, warnings, onEdit, onDelete, onDuplicate, onMove }: TableProps) {
+export function Table({
+  doc,
+  warnings,
+  onEdit,
+  onDelete,
+  onDuplicate,
+  onMove,
+  hideNoise,
+}: TableProps) {
   const warnByIndex = new Map<number, string[]>()
   for (const w of warnings) {
     const arr = warnByIndex.get(w.lineIndex) ?? []
@@ -31,6 +40,7 @@ export function Table({ doc, warnings, onEdit, onDelete, onDuplicate, onMove }: 
       </thead>
       <tbody>
         {doc.lines.map((line, i) => {
+          if (hideNoise && (line.kind === 'comment' || line.kind === 'blank')) return null
           const isMuted = line.kind === 'blank' || line.kind === 'comment'
           const isError = line.kind === 'error'
           const rowWarnings = warnByIndex.get(i)
