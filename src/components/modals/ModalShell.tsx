@@ -16,7 +16,7 @@ export function ModalShell({ title, children, onSave, onCancel, saveDisabled }: 
         <div className="modal-body">{children}</div>
         <div className="modal-actions">
           <button onClick={onCancel}>Cancel</button>
-          <button onClick={onSave} disabled={saveDisabled}>
+          <button className="btn-primary" onClick={onSave} disabled={saveDisabled}>
             Save
           </button>
         </div>

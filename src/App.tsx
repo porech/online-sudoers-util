@@ -4,6 +4,7 @@ import { Editor } from './editor/Editor'
 import { Table } from './components/Table'
 import { Toolbar } from './components/Toolbar'
 import { AddEntryMenu } from './components/AddEntryMenu'
+import { ThemeToggle } from './ui/ThemeToggle'
 import { useDocument } from './sync/useDocument'
 import { loadActiveText } from './sync/storage'
 import { newNode, type NewKind } from './model/factories'
@@ -70,15 +71,18 @@ export default function App() {
       <header className="app-header">
         <div className="title-row">
           <h1>Online Sudoers Util</h1>
-          <Toolbar
-            text={text}
-            canUndo={docState.canUndo}
-            canRedo={docState.canRedo}
-            onUndo={docState.undo}
-            onRedo={docState.redo}
-            onClear={() => docState.setText('', 'table')}
-            onLoadExample={() => docState.setText(EXAMPLE, 'table')}
-          />
+          <div className="header-actions">
+            <ThemeToggle />
+            <Toolbar
+              text={text}
+              canUndo={docState.canUndo}
+              canRedo={docState.canRedo}
+              onUndo={docState.undo}
+              onRedo={docState.redo}
+              onClear={() => docState.setText('', 'table')}
+              onLoadExample={() => docState.setText(EXAMPLE, 'table')}
+            />
+          </div>
         </div>
         <p className="intro">
           Paste an existing <code>sudoers</code> file into the editor on the left to see it parsed
@@ -91,9 +95,11 @@ export default function App() {
 
       <main className="split">
         <section className="pane">
+          <h2 className="pane-title">Editor</h2>
           <Editor value={text} onChange={(t) => docState.setText(t, 'editor')} />
         </section>
         <section className="pane">
+          <h2 className="pane-title">Entries</h2>
           <div className="table-controls">
             <AddEntryMenu onAdd={onAdd} />
             <label>
