@@ -5,6 +5,7 @@ import { Table } from './components/Table'
 import { Toolbar } from './components/Toolbar'
 import { AddEntryMenu } from './components/AddEntryMenu'
 import { ThemeToggle } from './ui/ThemeToggle'
+import { GitHubLink } from './ui/GitHubLink'
 import { useDocument } from './sync/useDocument'
 import { loadActiveText } from './sync/storage'
 import { newNode, type NewKind } from './model/factories'
@@ -72,6 +73,7 @@ export default function App() {
         <div className="title-row">
           <h1>Online Sudoers Util</h1>
           <div className="header-actions">
+            <GitHubLink />
             <ThemeToggle />
             <Toolbar
               text={text}
