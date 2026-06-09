@@ -16,8 +16,7 @@ export function parseUserSpec(raw: string, _line: number): Line {
   const remainder = work.slice(firstSpace + 1).trim()
   const users = splitTopLevel(usersPart, ',').map((s) => s.trim()).filter(Boolean)
 
-  const groups: SpecGroup[] = splitSpecGroups(remainder)
-    .map((seg) => parseSpecGroup(seg.trim()))
+  const groups: SpecGroup[] = splitSpecGroups(remainder).map((seg) => parseSpecGroup(seg.trim()))
 
   const node: UserSpecNode = { kind: 'userspec', raw, dirty: false, users, specGroups: groups }
   if (inlineComment !== undefined) node.inlineComment = inlineComment
@@ -34,7 +33,9 @@ function parseSpecGroup(seg: string): SpecGroup {
 }
 
 function parseCmndSpecList(s: string): CmndSpec[] {
-  const segments = splitTopLevel(s, ',').map((x) => x.trim()).filter(Boolean)
+  // Split on top-level commas, skipping commas inside a runas spec's parentheses
+  // (e.g. "(root, daemon) /bin/a" is ONE command spec, not two).
+  const segments = splitTopLevelParen(s, ',').map((x) => x.trim()).filter(Boolean)
   let inheritedRunas: RunasSpec | undefined
   let inheritedTags: Tag[] = []
   const specs: CmndSpec[] = []
@@ -130,70 +131,53 @@ function mergeTags(base: Tag[], incoming: Tag[]): Tag[] {
   return result
 }
 
-// Split the remainder of a UserSpec into SpecGroup segments.
-// A structural ':' separates HostList=CmndSpecList groups.
-// Tags also use ':', but they appear inside CmndSpecList (after the '=').
-// Strategy: collect top-level '=' positions, then find the structural ':' boundaries.
-// A ':' is structural when it is NOT inside a tag (i.e. it is followed, after whitespace,
-// by content that contains a top-level '=' — meaning a new host=cmnds group starts).
+// Split the remainder of a UserSpec into SpecGroup segments at the structural ':'.
+// A top-level ':' separates HostList=CmndSpecList groups UNLESS it is:
+//   - inside a runas spec's parentheses  (e.g. the ':' in "(root:wheel)"), or
+//   - the colon terminating a tag keyword (e.g. the ':' in "NOPASSWD:").
+// A tag colon is identified by the uppercase word immediately preceding it. This
+// is robust against inline options like "CWD=/x" whose '=' would otherwise be
+// mistaken for a group separator by an '='-counting approach.
 function splitSpecGroups(s: string): string[] {
-  // Find all top-level '=' positions
-  const eqPositions = topLevelPositions(s, '=')
-  if (eqPositions.length === 0) return [s]
-
-  // Find all top-level ':' positions
-  const colonPositions = topLevelPositions(s, ':')
-
-  // A colon at position p is structural if there is an '=' after p (i.e. a new group).
-  // The structural colons are those that come BEFORE an '='.
-  // For N equals signs, there are N-1 structural colons (one per additional group).
-  // The structural colons are the ones between consecutive eq positions:
-  // specifically, the LAST colon that appears before each eq position (except the first).
-  const structuralColons: number[] = []
-  for (let i = 1; i < eqPositions.length; i++) {
-    const eq = eqPositions[i]
-    // find the last colon before this eq
-    const candidates = colonPositions.filter((c) => c < eq && (i === 1 || c > eqPositions[i - 1]))
-    if (candidates.length > 0) {
-      structuralColons.push(candidates[candidates.length - 1])
-    }
-  }
-
-  if (structuralColons.length === 0) return [s]
-
   const result: string[] = []
-  let prev = 0
-  for (const sc of structuralColons) {
-    result.push(s.slice(prev, sc))
-    prev = sc + 1
-  }
-  result.push(s.slice(prev))
-  return result
-}
-
-// Return positions of all top-level (not in quotes/parens) occurrences of char in s.
-function topLevelPositions(s: string, char: string): number[] {
-  const positions: number[] = []
-  let inD = false, inS = false, inParen = 0
+  let segStart = 0
+  let inD = false
+  let inS = false
+  let inParen = 0
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
     if (c === '\\' && i + 1 < s.length) { i++; continue }
     if (c === '"' && !inS) { inD = !inD; continue }
     if (c === "'" && !inD) { inS = !inS; continue }
-    if (!inD && !inS) {
-      if (c === '(') { inParen++; continue }
-      if (c === ')') { inParen--; continue }
-      if (inParen === 0 && c === char) positions.push(i)
+    if (inD || inS) continue
+    if (c === '(') { inParen++; continue }
+    if (c === ')') { if (inParen > 0) inParen--; continue }
+    if (c === ':' && inParen === 0 && !isTagColon(s, i)) {
+      result.push(s.slice(segStart, i))
+      segStart = i + 1
     }
   }
-  return positions
+  result.push(s.slice(segStart))
+  return result
+}
+
+// True if the ':' at index i terminates a tag keyword (e.g. the ':' in "NOPASSWD:").
+function isTagColon(s: string, i: number): boolean {
+  let j = i - 1
+  while (j >= 0 && (s[j] === ' ' || s[j] === '\t')) j--
+  const end = j
+  while (j >= 0 && /[A-Z_]/.test(s[j])) j--
+  const word = s.slice(j + 1, end + 1)
+  return word.length > 0 && isTag(word)
 }
 
 // Like splitTopLevel but also skips content inside parentheses.
 function splitTopLevelParen(s: string, delim: string): string[] {
   const out: string[] = []
   let cur = ''
-  let inD = false, inS = false, inParen = 0
+  let inD = false
+  let inS = false
+  let inParen = 0
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
     if (c === '\\' && i + 1 < s.length) { cur += c + s[i + 1]; i++; continue }
@@ -209,7 +193,9 @@ function splitTopLevelParen(s: string, delim: string): string[] {
 }
 
 function indexOfTopLevelSpace(s: string): number {
-  let inD = false, inS = false, inParen = 0
+  let inD = false
+  let inS = false
+  let inParen = 0
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
     if (c === '\\' && i + 1 < s.length) { i++; continue }
@@ -223,7 +209,8 @@ function indexOfTopLevelSpace(s: string): number {
 }
 
 function stripInlineComment(s: string): string {
-  let inD = false, inS = false
+  let inD = false
+  let inS = false
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
     if (c === '\\' && i + 1 < s.length) { i++; continue }
