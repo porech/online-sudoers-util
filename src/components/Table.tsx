@@ -30,6 +30,12 @@ export function Table({
 
   return (
     <table className="entry-table">
+      <colgroup>
+        <col className="col-type" />
+        <col />
+        <col className="col-comment" />
+        <col className="col-actions" />
+      </colgroup>
       <thead>
         <tr>
           <th>Type</th>

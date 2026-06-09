@@ -67,17 +67,26 @@ export default function App() {
 
   return (
     <div className="app">
-      <header>
-        <h1>Online Sudoers Util</h1>
-        <Toolbar
-          text={text}
-          canUndo={docState.canUndo}
-          canRedo={docState.canRedo}
-          onUndo={docState.undo}
-          onRedo={docState.redo}
-          onClear={() => docState.setText('', 'table')}
-          onLoadExample={() => docState.setText(EXAMPLE, 'table')}
-        />
+      <header className="app-header">
+        <div className="title-row">
+          <h1>Online Sudoers Util</h1>
+          <Toolbar
+            text={text}
+            canUndo={docState.canUndo}
+            canRedo={docState.canRedo}
+            onUndo={docState.undo}
+            onRedo={docState.redo}
+            onClear={() => docState.setText('', 'table')}
+            onLoadExample={() => docState.setText(EXAMPLE, 'table')}
+          />
+        </div>
+        <p className="intro">
+          Paste an existing <code>sudoers</code> file into the editor on the left to see it parsed
+          into an editable table on the right — or start from scratch with{' '}
+          <strong>Add entry</strong> (or <strong>Load example</strong>). Edits sync both ways:
+          change the text or the table and the other updates automatically. Everything stays in your
+          browser — nothing is uploaded.
+        </p>
       </header>
 
       <main className="split">
@@ -85,15 +94,17 @@ export default function App() {
           <Editor value={text} onChange={(t) => docState.setText(t, 'editor')} />
         </section>
         <section className="pane">
-          <AddEntryMenu onAdd={onAdd} />
-          <label>
-            <input
-              type="checkbox"
-              checked={hideNoise}
-              onChange={(e) => setHideNoise(e.target.checked)}
-            />{' '}
-            Hide comments &amp; blanks
-          </label>
+          <div className="table-controls">
+            <AddEntryMenu onAdd={onAdd} />
+            <label>
+              <input
+                type="checkbox"
+                checked={hideNoise}
+                onChange={(e) => setHideNoise(e.target.checked)}
+              />{' '}
+              Hide comments &amp; blanks
+            </label>
+          </div>
           <Table
             doc={doc}
             warnings={warnings}

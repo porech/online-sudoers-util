@@ -1,26 +1,42 @@
 .app {
-  font-family: system-ui, sans-serif;
-  margin: 0 auto;
-  max-width: 1400px;
-  padding: 1rem;
+  width: 100%;
+  padding: 1rem 1.5rem 2rem;
 }
-header {
+
+/* ---- header / intro ---- */
+.app-header {
+  margin-bottom: 1rem;
+}
+.title-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
   justify-content: space-between;
+  gap: 1rem;
   flex-wrap: wrap;
+}
+.app-header h1 {
+  font-size: 1.9rem;
+  margin: 0;
+}
+.intro {
+  margin-top: 0.5rem;
+  max-width: 90ch;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 .toolbar {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
 }
+
+/* ---- split layout ---- */
 .split {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  align-items: start;
+  align-items: stretch;
 }
 @media (max-width: 900px) {
   .split {
@@ -28,28 +44,64 @@ header {
   }
 }
 .pane {
-  min-width: 0;
+  min-width: 0; /* allow children to shrink instead of overflowing the grid */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
+
+/* ---- editor ---- */
 .editor {
-  border: 1px solid #ccc;
-  min-height: 400px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  height: 72vh;
+  min-height: 320px;
+  overflow: hidden; /* CodeMirror's own scroller handles overflow */
 }
-.cm-content {
-  font-family: ui-monospace, monospace;
+.editor .cm-editor {
+  height: 100%;
+}
+.editor .cm-content {
+  font-family: ui-monospace, Consolas, monospace;
+  text-align: left;
+}
+
+/* ---- table ---- */
+.table-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 .entry-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 .entry-table th,
 .entry-table td {
-  border: 1px solid #ddd;
-  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.5rem;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  vertical-align: top;
+  overflow-wrap: anywhere; /* break long values (paths, env lists) instead of overflowing */
+}
+.entry-table th {
+  background: #f6f8fa;
+  font-weight: 600;
+}
+.col-type {
+  width: 7rem;
+}
+.col-comment {
+  width: 9rem;
+}
+.col-actions {
+  width: 6.5rem;
 }
 .entry-table tr.muted {
-  color: #888;
+  color: var(--text-muted);
 }
 .entry-table tr.error {
   background: #fff0f0;
@@ -63,6 +115,12 @@ header {
   gap: 0.25rem;
   flex-wrap: wrap;
 }
+.actions button {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+}
+
+/* ---- modals ---- */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -70,13 +128,14 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem;
 }
 .modal {
   background: #fff;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   border-radius: 8px;
-  max-width: 700px;
-  width: 90%;
+  max-width: 720px;
+  width: 100%;
   max-height: 90vh;
   overflow: auto;
 }
@@ -100,8 +159,14 @@ header {
   gap: 0.25rem;
   align-items: center;
 }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
 .help {
-  color: #555;
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 .copied {
@@ -109,14 +174,26 @@ header {
 }
 .add-entry {
   position: relative;
-  margin-bottom: 0.5rem;
 }
 .add-entry .menu {
   position: absolute;
   background: #fff;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
+  border-radius: 6px;
   list-style: none;
-  margin: 0;
+  margin: 0.25rem 0 0;
   padding: 0.25rem;
   z-index: 10;
+}
+.add-entry .menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+.add-entry .menu button:hover {
+  background: var(--code-bg);
 }
