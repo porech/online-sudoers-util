@@ -1,0 +1,11 @@
+# Sample sudoers file
+Defaults env_reset
+Defaults:alice !requiretty
+
+User_Alias ADMINS = alice, bob
+Cmnd_Alias PKG = /usr/bin/apt, /usr/bin/dpkg
+
+root    ALL=(ALL:ALL) ALL
+%admin  ALL=(ALL) NOPASSWD: ALL
+ADMINS  ALL = PKG # package management only
+@includedir /etc/sudoers.d

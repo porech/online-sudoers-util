@@ -1,0 +1,122 @@
+.app {
+  font-family: system-ui, sans-serif;
+  margin: 0 auto;
+  max-width: 1400px;
+  padding: 1rem;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
+.pane {
+  min-width: 0;
+}
+.editor {
+  border: 1px solid #ccc;
+  min-height: 400px;
+}
+.cm-content {
+  font-family: ui-monospace, monospace;
+}
+.entry-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.entry-table th,
+.entry-table td {
+  border: 1px solid #ddd;
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  font-size: 0.9rem;
+}
+.entry-table tr.muted {
+  color: #888;
+}
+.entry-table tr.error {
+  background: #fff0f0;
+}
+.warning {
+  color: #b36b00;
+  font-size: 0.8rem;
+}
+.actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 700px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+}
+.modal label {
+  display: block;
+  margin: 0.5rem 0;
+}
+.modal input,
+.modal select {
+  width: 100%;
+  box-sizing: border-box;
+}
+.modal .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.modal .tags label {
+  width: auto;
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+.help {
+  color: #555;
+  font-size: 0.8rem;
+}
+.copied {
+  color: green;
+}
+.add-entry {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+.add-entry .menu {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+  z-index: 10;
+}
