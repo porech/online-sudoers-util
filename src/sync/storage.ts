@@ -17,9 +17,11 @@ function emptyEnvelope(): Envelope {
 }
 
 function read(): Envelope {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return emptyEnvelope()
+  // getItem can throw (SecurityError in sandboxed iframes / private mode), and
+  // JSON.parse can throw on corrupt data. Both degrade to a fresh envelope.
   try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return emptyEnvelope()
     const parsed = JSON.parse(raw) as Envelope
     if (parsed?.version !== 1 || !parsed.sessions) return emptyEnvelope()
     return parsed
@@ -39,7 +41,13 @@ export function saveActiveText(text: string, updatedAt = 0): void {
   const env = read()
   const id = env.activeSessionId
   env.sessions[id] = { name: env.sessions[id]?.name ?? 'Untitled', text, updatedAt }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(env))
+  // Persistence is best-effort: ignore quota/security errors (e.g. private mode)
+  // so the app keeps working even when localStorage is unavailable.
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(env))
+  } catch {
+    // intentionally ignored
+  }
 }
 
 export function clearActive(): void {
