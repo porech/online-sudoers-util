@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . && prettier --check ."
+    "typecheck:test": "tsc -p tsconfig.test.json",
+    "lint": "eslint . && prettier --check . && npm run typecheck:test"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.3",
