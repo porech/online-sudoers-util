@@ -1,6 +1,7 @@
 import type {
   Line, DefaultsNode, DefaultsParam, AliasNode,
   UserSpecNode, SpecGroup, CmndSpec, RunasSpec, Tag,
+  SudoersDocument,
 } from './types'
 
 export function serializeLine(line: Line): string {
@@ -77,4 +78,10 @@ function serializeCmndSpecList(specs: CmndSpec[]): string {
 function serializeRunas(r: RunasSpec): string {
   const u = r.users.join(', ')
   return r.groups.length > 0 ? `(${u}:${r.groups.join(', ')})` : `(${u})`
+}
+
+export function serializeDocument(doc: SudoersDocument): string {
+  return doc.lines
+    .map((line) => (line.dirty ? serializeLine(line) : line.raw))
+    .join('\n')
 }
