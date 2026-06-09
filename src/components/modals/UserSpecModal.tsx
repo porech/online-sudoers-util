@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { UserSpecNode, SpecGroup, CmndSpec, Tag } from '../../model/types'
+import type { UserSpecNode, SpecGroup, CmndSpec, Tag, CmndOption } from '../../model/types'
 import { ModalShell } from './ModalShell'
 import { HelpText } from '../HelpText'
 import { TAGS, tagInfo } from '../../model/catalog'
@@ -23,6 +23,7 @@ const clone = (g: SpecGroup): SpecGroup => ({
 export function UserSpecModal({ node, onSave, onCancel }: Props) {
   const [users, setUsers] = useState(node.users.join(', '))
   const [groups, setGroups] = useState<SpecGroup[]>(node.specGroups.map(clone))
+  const [inlineComment, setInlineComment] = useState(node.inlineComment ?? '')
 
   const updateGroup = (gi: number, patch: Partial<SpecGroup>) =>
     setGroups((gs) => gs.map((g, i) => (i === gi ? { ...g, ...patch } : g)))
@@ -48,6 +49,23 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
         }
       }),
     )
+  const updateOptions = (gi: number, ci: number, options: CmndOption[]) =>
+    updateCmnd(gi, ci, { options })
+  const updateOption = (gi: number, ci: number, oi: number, patch: Partial<CmndOption>) =>
+    setGroups((gs) =>
+      gs.map((g, i) =>
+        i === gi
+          ? {
+              ...g,
+              cmndSpecs: g.cmndSpecs.map((c, k) =>
+                k === ci
+                  ? { ...c, options: c.options.map((o, j) => (j === oi ? { ...o, ...patch } : o)) }
+                  : c,
+              ),
+            }
+          : g,
+      ),
+    )
   const addCmnd = (gi: number) =>
     setGroups((gs) =>
       gs.map((g, i) =>
@@ -70,7 +88,14 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
-      specGroups: groups,
+      specGroups: groups.map((g) => ({
+        ...g,
+        cmndSpecs: g.cmndSpecs.map((c) => ({
+          ...c,
+          options: c.options.filter((o) => o.name.trim() !== ''),
+        })),
+      })),
+      inlineComment: inlineComment.trim() === '' ? undefined : inlineComment.trim(),
     })
 
   return (
@@ -156,6 +181,48 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
                   </label>
                 ))}
               </div>
+              <div className="options">
+                <span className="options-label">
+                  Options{' '}
+                  <HelpText>
+                    Per-command options like CWD (working directory), TIMEOUT, or CHROOT, written as
+                    NAME=value.
+                  </HelpText>
+                </span>
+                {c.options.map((o, oi) => (
+                  <div key={oi} className="option-row">
+                    <input
+                      aria-label={`option name ${gi}-${ci}-${oi}`}
+                      value={o.name}
+                      onChange={(e) => updateOption(gi, ci, oi, { name: e.target.value })}
+                    />
+                    <span> = </span>
+                    <input
+                      aria-label={`option value ${gi}-${ci}-${oi}`}
+                      value={o.value}
+                      onChange={(e) => updateOption(gi, ci, oi, { value: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateOptions(
+                          gi,
+                          ci,
+                          c.options.filter((_, j) => j !== oi),
+                        )
+                      }
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => updateOptions(gi, ci, [...c.options, { name: '', value: '' }])}
+                >
+                  Add option
+                </button>
+              </div>
             </div>
           ))}
           <button type="button" onClick={() => addCmnd(gi)}>
@@ -166,6 +233,14 @@ export function UserSpecModal({ node, onSave, onCancel }: Props) {
       <button type="button" onClick={addGroup}>
         Add host group
       </button>
+
+      <label>
+        Inline comment{' '}
+        <HelpText>
+          An optional comment shown after this entry on the same line (the part after #).
+        </HelpText>
+        <input value={inlineComment} onChange={(e) => setInlineComment(e.target.value)} />
+      </label>
     </ModalShell>
   )
 }
