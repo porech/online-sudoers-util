@@ -1,13 +1,31 @@
 :root {
+  /* ---- light theme tokens ---- */
+  --bg: #f6f8fa;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --border: #d0d7de;
+  --border-strong: #afb8c1;
   --text: #1f2328;
   --text-muted: #57606a;
-  --text-h: #0b0d10;
-  --bg: #ffffff;
-  --border: #d0d7de;
-  --code-bg: #f4f3ec;
+  --heading: #0b0d10;
   --accent: #8250df;
+  --accent-hover: #6f42c1;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgba(130, 80, 223, 0.12);
+  --danger: #cf222e;
+  --danger-soft: rgba(207, 34, 46, 0.08);
+  --warning: #b36b00;
+  --code-bg: #f0f2f5;
 
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(27, 31, 36, 0.08);
+  --shadow: 0 8px 24px rgba(27, 31, 36, 0.16);
+
+  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+
+  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
   color: var(--text);
@@ -15,6 +33,54 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Dark tokens follow the system preference unless the user forced light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #21262d;
+    --border: #30363d;
+    --border-strong: #484f58;
+    --text: #e6edf3;
+    --text-muted: #9198a1;
+    --heading: #f0f6fc;
+    --accent: #a371f7;
+    --accent-hover: #b78cf8;
+    --accent-contrast: #ffffff;
+    --accent-soft: rgba(163, 113, 247, 0.2);
+    --danger: #ff7b72;
+    --danger-soft: rgba(248, 81, 73, 0.15);
+    --warning: #e3b341;
+    --code-bg: #21262d;
+
+    --shadow-sm: 0 1px 2px rgba(1, 4, 9, 0.6);
+    --shadow: 0 8px 24px rgba(1, 4, 9, 0.7);
+  }
+}
+
+/* Explicit dark override (toggle), wins over system preference. */
+:root[data-theme='dark'] {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface-2: #21262d;
+  --border: #30363d;
+  --border-strong: #484f58;
+  --text: #e6edf3;
+  --text-muted: #9198a1;
+  --heading: #f0f6fc;
+  --accent: #a371f7;
+  --accent-hover: #b78cf8;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgba(163, 113, 247, 0.2);
+  --danger: #ff7b72;
+  --danger-soft: rgba(248, 81, 73, 0.15);
+  --warning: #e3b341;
+  --code-bg: #21262d;
+
+  --shadow-sm: 0 1px 2px rgba(1, 4, 9, 0.6);
+  --shadow: 0 8px 24px rgba(1, 4, 9, 0.7);
 }
 
 *,
@@ -30,6 +96,14 @@ body,
   width: 100%;
 }
 
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
 #root {
   min-height: 100vh;
 }
@@ -37,7 +111,7 @@ body,
 h1,
 h2,
 h3 {
-  color: var(--text-h);
+  color: var(--heading);
   font-weight: 600;
   line-height: 1.2;
 }
@@ -47,10 +121,10 @@ p {
 }
 
 code {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
   padding: 1px 5px;
   border-radius: 4px;
   background: var(--code-bg);
-  color: var(--text-h);
+  color: var(--heading);
 }

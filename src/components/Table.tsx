@@ -57,7 +57,9 @@ export function Table({
               key={i}
               className={[isMuted ? 'muted' : '', isError ? 'error' : ''].join(' ').trim()}
             >
-              <td>{lineTypeLabel(line)}</td>
+              <td>
+                <span className={`badge badge-${line.kind}`}>{lineTypeLabel(line)}</span>
+              </td>
               <td>
                 {lineSummary(line)}
                 {rowWarnings?.map((w, k) => (

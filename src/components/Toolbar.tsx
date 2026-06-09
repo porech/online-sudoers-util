@@ -43,7 +43,9 @@ export function Toolbar({
 
   return (
     <div className="toolbar">
-      <button onClick={copy}>Copy</button>
+      <button className="btn-primary" onClick={copy}>
+        Copy
+      </button>
       {copied && (
         <span className="copied" role="status">
           Copied!

@@ -1,11 +1,73 @@
 .app {
   width: 100%;
-  padding: 1rem 1.5rem 2rem;
+  padding: 1.25rem 1.5rem 2.5rem;
+}
+
+/* ---- buttons (base) ---- */
+.app button,
+.modal button {
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+.app button:hover,
+.modal button:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+.app button:active,
+.modal button:active {
+  background: var(--border);
+}
+.app button:focus-visible,
+.modal button:focus-visible,
+.app input:focus-visible,
+.app select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.app button:disabled,
+.modal button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary,
+.app .btn-primary,
+.modal .btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+.btn-primary:hover,
+.app .btn-primary:hover,
+.modal .btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--accent-contrast);
+}
+.btn-primary:active,
+.app .btn-primary:active,
+.modal .btn-primary:active {
+  background: var(--accent-hover);
 }
 
 /* ---- header / intro ---- */
 .app-header {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
 }
 .title-row {
   display: flex;
@@ -15,12 +77,22 @@
   flex-wrap: wrap;
 }
 .app-header h1 {
-  font-size: 1.9rem;
+  font-size: 1.7rem;
   margin: 0;
 }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.theme-toggle {
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
+}
 .intro {
-  margin-top: 0.5rem;
-  max-width: 90ch;
+  margin-top: 0.6rem;
+  max-width: 80ch;
   color: var(--text-muted);
   font-size: 0.95rem;
 }
@@ -29,6 +101,7 @@
   gap: 0.5rem;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* ---- split layout ---- */
@@ -47,23 +120,49 @@
   min-width: 0; /* allow children to shrink instead of overflowing the grid */
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem;
+}
+.pane-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 0;
 }
 
 /* ---- editor ---- */
 .editor {
   border: 1px solid var(--border);
-  border-radius: 6px;
-  height: 72vh;
+  border-radius: var(--radius-sm);
+  height: 68vh;
   min-height: 320px;
   overflow: hidden; /* CodeMirror's own scroller handles overflow */
 }
 .editor .cm-editor {
   height: 100%;
+  background: var(--surface);
 }
 .editor .cm-content {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: var(--font-mono);
   text-align: left;
+  color: var(--text);
+}
+.editor .cm-gutters {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border-right: 1px solid var(--border);
+}
+.editor .cm-activeLine,
+.editor .cm-activeLineGutter {
+  background: var(--accent-soft);
+}
+.editor .cm-cursor {
+  border-left-color: var(--text);
 }
 
 /* ---- table ---- */
@@ -72,72 +171,127 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  font-size: 0.9rem;
 }
 .entry-table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 .entry-table th,
 .entry-table td {
-  border: 1px solid var(--border);
-  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 0.6rem;
   text-align: left;
   font-size: 0.85rem;
   vertical-align: top;
   overflow-wrap: anywhere; /* break long values (paths, env lists) instead of overflowing */
 }
 .entry-table th {
-  background: #f6f8fa;
+  background: var(--surface-2);
   font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-strong);
+}
+.entry-table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-2) 45%, transparent);
+}
+.entry-table tbody tr:hover {
+  background: var(--accent-soft);
 }
 .col-type {
-  width: 7rem;
+  width: 8rem;
 }
 .col-comment {
   width: 9rem;
 }
 .col-actions {
-  width: 6.5rem;
+  width: 7.5rem;
 }
 .entry-table tr.muted {
   color: var(--text-muted);
 }
 .entry-table tr.error {
-  background: #fff0f0;
+  background: var(--danger-soft);
+}
+.entry-table tr.error:hover {
+  background: var(--danger-soft);
 }
 .warning {
-  color: #b36b00;
+  color: var(--warning);
   font-size: 0.8rem;
 }
+
+/* ---- type badges ---- */
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.badge-comment,
+.badge-blank {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+.badge-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ---- row actions ---- */
 .actions {
   display: flex;
   gap: 0.25rem;
   flex-wrap: wrap;
 }
-.actions button {
-  font-size: 0.75rem;
-  padding: 2px 6px;
+.app .actions button {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.4rem;
 }
 
 /* ---- modals ---- */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  z-index: 100;
 }
 .modal {
-  background: #fff;
-  padding: 1rem 1.25rem;
-  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   max-width: 720px;
   width: 100%;
   max-height: 90vh;
   overflow: auto;
+  padding: 0;
+}
+.modal h2 {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-size: 1.15rem;
+  border-bottom: 1px solid var(--border);
+}
+.modal-body {
+  padding: 1rem 1.25rem;
 }
 .modal label {
   display: block;
@@ -149,10 +303,24 @@
 .modal select {
   width: 100%;
   box-sizing: border-box;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+.modal input:not([type='checkbox']):not([type='radio']):focus,
+.modal select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
 }
 .modal input[type='checkbox'] {
   width: auto;
   margin-right: 0.5rem;
+  accent-color: var(--accent);
 }
 /* Checkbox rows (Defaults flags, command tags, negate toggle): checkbox inline
    with its description text, aligned to the first line. */
@@ -201,48 +369,58 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-  margin-top: 1rem;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid var(--border);
 }
+
+/* ---- help text ---- */
 .help {
   color: var(--text-muted);
   font-size: 0.8rem;
 }
-.copied {
-  color: green;
+.help::first-letter {
+  color: var(--accent);
 }
+.copied {
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---- add entry menu ---- */
 .add-entry {
   position: relative;
 }
 .add-entry .menu {
   position: absolute;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   list-style: none;
   margin: 0.25rem 0 0;
   padding: 0.25rem;
   z-index: 10;
   width: 22rem;
   max-width: 90vw;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow);
 }
-.add-entry .menu button {
+.app .add-entry .menu button {
   display: block;
   width: 100%;
   text-align: left;
   border: none;
   background: none;
-  padding: 0.4rem 0.6rem;
-  border-radius: 4px;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
-.add-entry .menu button:hover {
-  background: var(--code-bg);
+.app .add-entry .menu button:hover {
+  background: var(--accent-soft);
 }
 .menu-label {
   display: block;
   font-weight: 600;
-  color: var(--text-h);
+  color: var(--heading);
 }
 .menu-desc {
   display: block;
